@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Star Idol Stage! 星のアイドルステージ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="gameContainer">
+        <!-- Scanlines overlay -->
+        <div class="scanlines"></div>
+
+        <!-- HUD Layer -->
+        <div id="hud">
+            <div class="hud-row">
+                <div class="hud-box avatar-box">
+                    <span id="avatarMood">🎀 なぁたん</span>
+                </div>
+                <div class="hud-box">
+                    <span class="hud-title">SCORE</span>
+                    <span id="hudScore" class="hud-val">0</span>
+                </div>
+                <div class="hud-box">
+                    <span class="hud-title">ALT</span>
+                    <span id="hudAltitude" class="hud-val">0m</span>
+                </div>
+                <div class="hud-box">
+                    <span class="hud-title">LIVES</span>
+                    <span id="hudLives" class="hud-val">❤❤❤</span>
+                </div>
+            </div>
+
+            <div class="hud-row">
+                <div class="cheer-container">
+                    <span class="cheer-label">AUDIENCE HYPE</span>
+                    <div class="cheer-bar">
+                        <div id="cheerFill"></div>
+                    </div>
+                </div>
+                <div id="hudCombo"></div>
+            </div>
+        </div>
+
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Touch Controls -->
+        <div id="touchControls">
+            <div class="touch-btn-group">
+                <button class="touch-btn" id="btnLeft">◀</button>
+                <button class="touch-btn" id="btnRight">▶</button>
+            </div>
+            <div class="touch-btn-group">
+                <button class="touch-btn" id="btnJump">★</button>
+            </div>
+        </div>
+
+        <!-- Sound Button -->
+        <button id="muteBtn">🔊 Sound On</button>
+
+        <!-- Start Overlay -->
+        <div id="startOverlay" class="overlay">
+            <h1 class="game-title">★ STAR IDOL STAGE! ★</h1>
+            <p class="subtitle">星のアイドルステージ</p>
+
+            <div class="character-card">
+                <h3 class="char-title">Meet Hikari (Live Stage Edition)!</h3>
+                <p class="char-desc">
+                    Inspired by the live concert idol: high ponytail with red gingham bow, voluminous puffy ruffled sleeves, handheld stage mic, and pointing jumps! Unleash <strong>IDOL FEVER</strong>!
+                </p>
+            </div>
+
+            <div class="controls-hint">
+                <p><span class="key-badge">A</span> / <span class="key-badge">D</span> or <span class="key-badge">◀</span> / <span class="key-badge">▶</span> : Move</p>
+                <p><span class="key-badge">W</span> / <span class="key-badge">Space</span> / <span class="key-badge">▲</span> : Jump (Press again for Double Jump!)</p>
+                <p><span class="key-badge">P</span> : Pause &bull; <span class="key-badge">M</span> : Mute Audio</p>
+            </div>
+
+            <button class="retro-btn" id="startBtn">START CONCERT!</button>
+        </div>
+
+        <!-- Pause Overlay -->
+        <div id="pauseOverlay" class="overlay" style="display: none;">
+            <h2 class="game-title">STAGE PAUSED</h2>
+            <p class="subtitle">Catch your breath, Idol!</p>
+            <p style="color: #b0bec5; margin-bottom: 20px;">Press <span class="key-badge">P</span> or <span class="key-badge">ESC</span> to Resume</p>
+        </div>
+
+        <!-- Game Over Overlay (Cheki / Polaroid Photo Summary) -->
+        <div id="gameOverOverlay" class="overlay" style="display: none;">
+            <div class="cheki-card">
+                <div class="cheki-tape"></div>
+                <h2 class="cheki-title">ENCORE FINISHED!</h2>
+                <p class="cheki-sub">★ LIVE CONCERT STAGE ★</p>
+
+                <div class="cheki-photo">
+                    <div class="cheki-avatar-icon">🎤✨</div>
+                    <div class="cheki-stamp" id="chekiStamp">RANK S</div>
+                </div>
+
+                <div class="gameover-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Final Score:</span>
+                        <span id="finalScore" class="stat-val">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Highest Altitude:</span>
+                        <span id="finalAltitude" class="stat-val">0 m</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Performance:</span>
+                        <span id="finalRank" class="stat-val">B</span>
+                    </div>
+                </div>
+
+                <div class="cheki-sign">
+                    <span class="sign-handwritten">なぁたん ♡</span>
+                    <small>応援ありがとう！ (Thank you!)</small>
+                </div>
+
+                <button class="retro-btn" id="restartBtn">ONE MORE ENCORE! (RETRY)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="audio.js"></script>
+    <script src="player.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

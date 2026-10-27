@@ -1,0 +1,447 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka+One&family=M+PLUS+Rounded+1c:wght@700;900&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    background: radial-gradient(circle at center, #1e0836 0%, #0a0314 100%);
+    color: #ffffff;
+    font-family: 'Fredoka One', 'M PLUS Rounded 1c', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#gameContainer {
+    position: relative;
+    box-shadow: 0 0 40px rgba(255, 64, 129, 0.4), 0 0 100px rgba(123, 31, 162, 0.3);
+    border: 4px solid #ff4081;
+    border-radius: 14px;
+    overflow: hidden;
+    background-color: #0b0219;
+}
+
+canvas {
+    display: block;
+    background-color: #0b0219;
+}
+
+/* Retro CRT Scanlines Effect */
+.scanlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.25) 50%
+    );
+    background-size: 100% 4px;
+    z-index: 5;
+    opacity: 0.6;
+}
+
+/* Top HUD */
+#hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+    pointer-events: none;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.hud-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hud-box {
+    background: rgba(18, 5, 36, 0.65);
+    border: 1.5px solid rgba(255, 64, 129, 0.6);
+    border-radius: 8px;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+}
+
+.hud-title {
+    color: #ff80ab;
+    font-size: 11px;
+    font-family: 'Press Start 2P', monospace;
+}
+
+.hud-val {
+    color: #ffd54f;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#hudLives {
+    color: #ff4081;
+    letter-spacing: 3px;
+    font-size: 16px;
+}
+
+#hudCombo {
+    color: #ffea00;
+    font-size: 14px;
+    font-family: 'Press Start 2P', monospace;
+    animation: comboPulse 0.4s infinite alternate;
+}
+
+@keyframes comboPulse {
+    from { transform: scale(1); filter: drop-shadow(0 0 2px #ff4081); }
+    to { transform: scale(1.08); filter: drop-shadow(0 0 8px #ffeb3b); }
+}
+
+/* Cheer / Hype Bar */
+.cheer-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cheer-label {
+    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    color: #00e5ff;
+    white-space: nowrap;
+}
+
+.cheer-bar {
+    flex: 1;
+    height: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1.5px solid #00e5ff;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+#cheerFill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #ff4081, #ffeb3b, #00e5ff);
+    box-shadow: 0 0 10px #00e5ff;
+    transition: width 0.15s ease-out;
+}
+
+/* UI Overlays */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(13, 2, 28, 0.88);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 20;
+    padding: 24px;
+}
+
+.game-title {
+    font-size: 32px;
+    color: #ff4081;
+    text-shadow: 0 0 12px #ff4081, 0 0 24px #e040fb;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #ffe082;
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+}
+
+.character-card {
+    background: rgba(255, 64, 129, 0.15);
+    border: 2px solid #ff4081;
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    max-width: 320px;
+}
+
+.char-title {
+    color: #ff80ab;
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+
+.char-desc {
+    color: #e0f7fa;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.controls-hint {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: #b0bec5;
+    line-height: 1.6;
+}
+
+.key-badge {
+    background: #4a148c;
+    color: #ffd54f;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.retro-btn {
+    background: linear-gradient(180deg, #ff4081 0%, #c2185b 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 25px;
+    padding: 14px 32px;
+    font-size: 18px;
+    font-family: 'Fredoka One', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 64, 129, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.retro-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 20px rgba(255, 64, 129, 0.7);
+}
+
+.retro-btn:active {
+    transform: translateY(1px);
+}
+
+/* Sound Button */
+#muteBtn {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    z-index: 15;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #ff4081;
+    border-radius: 8px;
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* Touch On-Screen Controls for mobile / casual play */
+#touchControls {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 12;
+    pointer-events: none;
+}
+
+.touch-btn-group {
+    display: flex;
+    gap: 12px;
+    pointer-events: auto;
+}
+
+.touch-btn {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: rgba(255, 64, 129, 0.35);
+    border: 2px solid #ff4081;
+    color: #ffffff;
+    font-size: 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: background 0.1s;
+}
+
+.touch-btn:active {
+    background: rgba(255, 64, 129, 0.7);
+}
+
+/* Game Over Stats */
+.gameover-stats {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #ffd54f;
+    border-radius: 10px;
+    padding: 16px 24px;
+    margin-bottom: 20px;
+    min-width: 260px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.stat-label {
+    color: #b0bec5;
+}
+
+.stat-val {
+    color: #ffd54f;
+    font-weight: bold;
+}
+
+/* Avatar Badge */
+.avatar-box {
+    background: rgba(229, 57, 53, 0.28);
+    border: 1.5px solid #ff4081;
+    font-size: 12px;
+    padding: 4px 8px;
+    font-weight: bold;
+    color: #ff80ab;
+}
+
+/* Cheki / Polaroid Style Game Over */
+.cheki-card {
+    background: #fffcf8;
+    color: #212121;
+    padding: 22px 18px 20px 18px;
+    border-radius: 8px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(255, 64, 129, 0.35);
+    max-width: 320px;
+    width: 92%;
+    position: relative;
+    text-align: center;
+    border: 3px solid #ffcdd2;
+}
+
+.cheki-tape {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1.5deg);
+    width: 110px;
+    height: 24px;
+    background: repeating-linear-gradient(45deg, #e53935, #e53935 8px, #ffffff 8px, #ffffff 16px);
+    opacity: 0.9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+    border-radius: 2px;
+}
+
+.cheki-title {
+    font-size: 20px;
+    color: #d32f2f;
+    margin-top: 4px;
+    letter-spacing: 1px;
+    font-family: 'Fredoka One', sans-serif;
+}
+
+.cheki-sub {
+    font-size: 10px;
+    color: #757575;
+    margin-bottom: 12px;
+    font-family: 'Press Start 2P', monospace;
+}
+
+.cheki-photo {
+    background: linear-gradient(135deg, #260c4a 0%, #d81b60 100%);
+    border-radius: 6px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 2px solid #ff80ab;
+}
+
+.cheki-avatar-icon {
+    font-size: 40px;
+    filter: drop-shadow(0 0 10px #ffea00);
+}
+
+.cheki-stamp {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    border: 2.2px dashed #ff1744;
+    color: #ff1744;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transform: rotate(-12deg);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 6px rgba(255, 23, 68, 0.4);
+}
+
+.cheki-card .gameover-stats {
+    background: #fce4ec;
+    border: 1.5px solid #f48fb1;
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin-bottom: 12px;
+    width: 100%;
+    min-width: unset;
+}
+
+.cheki-card .stat-label {
+    color: #616161;
+    font-size: 13px;
+}
+
+.cheki-card .stat-val {
+    color: #c2185b;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.cheki-sign {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.sign-handwritten {
+    font-size: 26px;
+    color: #d81b60;
+    font-family: 'M PLUS Rounded 1c', cursive, sans-serif;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 2px rgba(216, 27, 96, 0.2);
+}
+
+.cheki-sign small {
+    color: #757575;
+    font-size: 11px;
+}
