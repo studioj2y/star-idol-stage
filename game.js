@@ -252,6 +252,9 @@ class StarIdolGame {
         this.stageCleared = false;
         this.finalPlatformSpawned = false;
 
+        // Reset key states to prevent stuck controls
+        this.keys = {};
+
         this.score = 0;
         this.lives = this.maxLives;
         this.combo = 0;
@@ -278,9 +281,9 @@ class StarIdolGame {
             color: '#7b1fa2'
         });
 
-        // Initial set of climbing platforms
+        // Initial set of climbing platforms (plenty of footholds)
         let currentY = this.height - 120;
-        for (let i = 0; i < 9; i++) {
+        for (let i = 0; i < 14; i++) {
             currentY -= 65 + Math.random() * 25;
             this.generatePlatform(currentY);
         }
@@ -295,10 +298,15 @@ class StarIdolGame {
             window.idolShop.updateUI();
         }
 
-        document.getElementById('startOverlay').style.display = 'none';
-        document.getElementById('gameOverOverlay').style.display = 'none';
-        document.getElementById('stageClearOverlay').style.display = 'none';
-        document.getElementById('pauseOverlay').style.display = 'none';
+        // Hide all modal overlays
+        ['startOverlay', 'gameOverOverlay', 'stageClearOverlay', 'pauseOverlay', 'shopModal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
+        if (document.activeElement && document.activeElement.blur) {
+            document.activeElement.blur();
+        }
 
         window.soundManager.startBGM();
         this.updateHUD();
@@ -360,12 +368,16 @@ class StarIdolGame {
     }
 
     loop(timestamp) {
-        if (!this.lastTime) this.lastTime = timestamp;
-        const dt = Math.min((timestamp - this.lastTime) / 1000, 0.1);
-        this.lastTime = timestamp;
+        try {
+            if (!this.lastTime) this.lastTime = timestamp;
+            const dt = Math.min((timestamp - this.lastTime) / 1000, 0.1);
+            this.lastTime = timestamp;
 
-        this.update(dt);
-        this.render();
+            this.update(dt);
+            this.render();
+        } catch(err) {
+            console.error('Game loop error:', err);
+        }
 
         requestAnimationFrame((t) => this.loop(t));
     }
@@ -481,9 +493,12 @@ class StarIdolGame {
         // Goal Platform Spawn Check
         const goalMeters = this.currentStage.goalAltitude || 500;
         const targetGoalY = this.height - 120 - (goalMeters * 10);
-        const highestPlatformY = this.platforms.reduce((min, p) => Math.min(min, p.y), this.cameraY + this.height);
+        let highestPlatformY = this.platforms.reduce((min, p) => Math.min(min, p.y), this.cameraY + this.height);
 
-        if (highestPlatformY > this.cameraY - 140 && !this.finalPlatformSpawned) {
+        // Continuously spawn platforms ahead so player always has platforms to climb
+        let spawnSafetyCap = 0;
+        while (highestPlatformY > this.cameraY - 260 && !this.finalPlatformSpawned && spawnSafetyCap < 8) {
+            spawnSafetyCap++;
             const nextY = highestPlatformY - (60 + Math.random() * 30);
             if (nextY <= targetGoalY) {
                 // Spawn the Grand Finale Center Stage Platform!
@@ -497,9 +512,11 @@ class StarIdolGame {
                     cityName: this.currentStage.name
                 });
                 this.finalPlatformSpawned = true;
-                this.addFloatingText(this.width / 2, targetGoalY - 45, `★ ${this.currentStage.name} 终点舞台已到达！ ★`, '#ffd700');
+                this.addFloatingText(this.width / 2, targetGoalY - 45, '★ ' + this.currentStage.name + ' 终点舞台已到达！ ★', '#ffd700');
+                break;
             } else {
                 this.generatePlatform(nextY);
+                highestPlatformY = nextY;
             }
         }
 
@@ -753,7 +770,17 @@ class StarIdolGame {
         this.currentStageIndex = (this.currentStageIndex + 1) % window.TOUR_STAGES.length;
         localStorage.setItem('star_idol_stage_index', this.currentStageIndex);
         this.currentStage = window.TOUR_STAGES[this.currentStageIndex];
-        document.getElementById('stageClearOverlay').style.display = 'none';
+
+        // Ensure overlays are hidden and buttons blurred
+        ['stageClearOverlay', 'startOverlay', 'gameOverOverlay', 'pauseOverlay', 'shopModal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
+        if (document.activeElement && document.activeElement.blur) {
+            document.activeElement.blur();
+        }
+
         this.startGame();
     }
 
@@ -765,14 +792,28 @@ class StarIdolGame {
         if (this.lives <= 0) {
             this.gameOver();
         } else {
-            // Respawn player on a rescue cloud just below current camera
+            // Respawn player on a rescue platform
             const safePlatform = this.platforms.find(p => p.y >= this.cameraY + 100 && p.y <= this.cameraY + this.height - 120 && !p.broken);
-            const respawnY = safePlatform ? safePlatform.y - 35 : this.cameraY + this.height * 0.5;
+            const respawnY = safePlatform ? safePlatform.y - 35 : this.cameraY + this.height * 0.55;
             const respawnX = safePlatform ? safePlatform.x + safePlatform.width / 2 : this.width / 2;
+
+            if (!safePlatform) {
+                this.platforms.push({
+                    x: respawnX - 50,
+                    y: respawnY + 35,
+                    width: 100,
+                    height: 15,
+                    type: 'normal',
+                    vx: 0,
+                    broken: false,
+                    breakTimer: 0,
+                    springActive: 0
+                });
+            }
 
             this.player.reset(respawnX, respawnY);
             this.player.vy = -7;
-            this.addFloatingText(this.width / 2, this.cameraY + 260, `MISS! LIVES LEFT: ${this.lives}`, '#ff5252');
+            this.addFloatingText(this.width / 2, this.cameraY + 260, 'MISS! LIVES LEFT: ' + this.lives, '#ff5252');
         }
     }
 

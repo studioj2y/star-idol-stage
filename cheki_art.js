@@ -77,16 +77,9 @@ class PixelArtCheki {
         ctx.fillRect(W / 2 - 22, 70, 10, 6);
         ctx.fillRect(W / 2 + 12, 70, 10, 6);
 
-        // 8. Photo Detail: Eye Glitter Sparkle Sticker on Cheekbone!
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = '#ffd700';
-        ctx.shadowBlur = 4;
-        this.drawPixelDiamond(ctx, W / 2 + 16, 68, 3.5);
-        ctx.shadowBlur = 0;
-
-        // 9. Photo Detail: Cute Heart Earring on Left Ear
-        ctx.fillStyle = '#ff1744';
-        this.drawPixelHeart(ctx, W / 2 + 25, 78, 4);
+        // 8. Dainty gold earring on left ear
+        ctx.fillStyle = '#ffd700';
+        ctx.fillRect(W / 2 + 25, 78, 2, 2);
 
         // 10. Warm Sparkling Eyes
         this.drawPixelEye(ctx, W / 2 - 14, 63);
@@ -109,7 +102,7 @@ class PixelArtCheki {
         this.drawBangs(ctx, W / 2, 68);
 
         // 13. Hand & Stage Microphone / Equipped Item
-        this.drawStageProp(ctx, W / 2 + 2, 86, equippedItem);
+        this.drawStageProp(ctx, W / 2 - 16, 96, equippedItem);
 
         // 14. Left Arm Pointing Up to the Stars (Iconic Pose)
         this.drawPointingHand(ctx, W - 28, 48);
@@ -209,37 +202,60 @@ class PixelArtCheki {
         ctx.arc(cx, cy - 4, 28, Math.PI, 0);
         ctx.fill();
 
-        // See-through bangs strands
-        ctx.fillRect(cx - 24, cy - 14, 6, 20);
-        ctx.fillRect(cx - 16, cy - 14, 5, 23);
-        ctx.fillRect(cx - 8, cy - 14, 5, 19);
-        ctx.fillRect(cx, cy - 14, 5, 22);
-        ctx.fillRect(cx + 8, cy - 14, 5, 19);
-        ctx.fillRect(cx + 16, cy - 14, 6, 24);
+        // Elegant see-through bangs stopping right above eyes
+        ctx.fillRect(cx - 22, cy - 14, 5, 15);
+        ctx.fillRect(cx - 15, cy - 14, 4, 13);
+        ctx.fillRect(cx - 8, cy - 14, 4, 12);
+        ctx.fillRect(cx - 1, cy - 14, 4, 12);
+        ctx.fillRect(cx + 6, cy - 14, 4, 12);
+        ctx.fillRect(cx + 13, cy - 14, 4, 14);
+        ctx.fillRect(cx + 19, cy - 14, 5, 15);
 
         // Side hair strands framing face
-        ctx.fillRect(cx - 28, cy - 6, 7, 36);
-        ctx.fillRect(cx + 21, cy - 6, 7, 34);
+        ctx.fillRect(cx - 27, cy - 6, 6, 36);
+        ctx.fillRect(cx + 21, cy - 6, 6, 34);
 
-        // Hair shine highlight
+        // Soft curved eyebrow arches above eyes
+        ctx.fillStyle = '#4a221a';
+        ctx.fillRect(cx - 14, cy - 8, 7, 2);
+        ctx.fillRect(cx + 8, cy - 8, 7, 2);
+
+        // Hair glossy shine highlight
         ctx.fillStyle = 'rgba(255, 235, 220, 0.45)';
         ctx.fillRect(cx - 16, cy - 20, 32, 4);
     }
 
     static drawPixelEye(ctx, x, y) {
-        // Dark brown base
-        ctx.fillStyle = '#2d140e';
-        ctx.fillRect(x, y, 7, 9);
-        // Amber iris
-        ctx.fillStyle = '#d85a38';
-        ctx.fillRect(x + 1, y + 3, 5, 5);
-        // Sparkling white catchlights
+        // 1. Sclera (White eye background)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x, y + 1, 8, 8);
+
+        // 2. Deep warm dark chestnut iris
+        ctx.fillStyle = '#26120e';
+        ctx.fillRect(x + 1, y + 1, 6, 8);
+
+        // 3. Lower warm honey-amber glow
+        ctx.fillStyle = '#d35400';
+        ctx.fillRect(x + 2, y + 4, 4, 4);
+        ctx.fillStyle = '#f39c12';
+        ctx.fillRect(x + 2, y + 6, 4, 2);
+
+        // 4. Centered dark round pupil
+        ctx.fillStyle = '#100503';
+        ctx.fillRect(x + 2, y + 3, 3, 3);
+
+        // 5. Crisp round top-left catchlight highlight
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(x + 1, y + 1, 2, 2);
-        ctx.fillRect(x + 4, y + 5, 2, 2);
-        // Eyelash upper line
-        ctx.fillStyle = '#1b0905';
+
+        // 6. Subtle bottom-right eye shine
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.fillRect(x + 4, y + 6, 1, 1);
+
+        // 7. Upper dark eyeliner & outer lash flick
+        ctx.fillStyle = '#1a0805';
         ctx.fillRect(x - 1, y - 1, 9, 2);
+        ctx.fillRect(x + 7, y - 2, 2, 2);
     }
 
     static drawStageProp(ctx, x, y, item) {

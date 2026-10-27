@@ -85,9 +85,15 @@ class IdolPlayer {
         this.jumpCount = 0;
         this.isGrounded = false;
         this.feverTimer = 0;
-        this.hasWings = false;
+        this.hasWings = (this.equippedHead === 'wings');
         this.wingsTimer = 0;
         this.trail = [];
+        this.isTwirling = false;
+        this.twirlAngle = 0;
+        this.ponytailAngle = 0;
+        this.ribbonAngle = 0;
+        this.blinkTimer = 0;
+        this.isBlinking = false;
     }
 
     update(keys, dt) {
@@ -385,33 +391,24 @@ class IdolPlayer {
         ctx.ellipse(0, 0, 13, 12, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Soft Cheerful Cheeks Blush
-        ctx.fillStyle = 'rgba(255, 90, 120, 0.45)';
+        // Soft Natural Rosy Cheeks Blush
+        ctx.fillStyle = 'rgba(255, 95, 125, 0.42)';
         ctx.beginPath();
-        ctx.arc(-7, 3, 3.2, 0, Math.PI * 2);
-        ctx.arc(7, 3, 3.2, 0, Math.PI * 2);
+        ctx.arc(-7, 3.2, 3.2, 0, Math.PI * 2);
+        ctx.arc(7, 3.2, 3.2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Photo Detail: Cute Glitter Sparkle Sticker under outer eye
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = '#ffd54f';
-        ctx.shadowBlur = 4;
-        this.drawMiniDiamond(ctx, 8.5, 1.5, 2.2);
-        ctx.shadowBlur = 0;
-
-        // Photo Detail: Dainty Dangling Heart Earring on ear
+        // Tiny gold stud on ear (clean, no face decals)
         ctx.fillStyle = '#ffd700';
         ctx.beginPath();
-        ctx.arc(12.5, 2, 1, 0, Math.PI * 2);
+        ctx.arc(12.5, 2, 1.2, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = '#ff1744';
-        this.drawMiniHeart(ctx, 13, 5, 2.5);
 
         // Radiant Live Idol Smile (wide joyful stage smile with teeth)
         if (this.isBlinking) {
-            // Happy curved eyes (^_^)
-            ctx.strokeStyle = '#381610';
-            ctx.lineWidth = 2.2;
+            // Happy curved anime eyes (^_^)
+            ctx.strokeStyle = '#2a110a';
+            ctx.lineWidth = 2.0;
             ctx.beginPath();
             ctx.arc(-5, -1, 3.2, Math.PI * 1.1, Math.PI * 1.9);
             ctx.stroke();
@@ -419,7 +416,7 @@ class IdolPlayer {
             ctx.arc(5, -1, 3.2, Math.PI * 1.1, Math.PI * 1.9);
             ctx.stroke();
         } else {
-            // Warm Amber/Brown Sparkling Stage Eyes
+            // Clean standard anime eyes (natural iris, pupil, crisp catchlight)
             this.drawAnimeEye(ctx, -5, -1);
             this.drawAnimeEye(ctx, 5, -1);
         }
@@ -492,34 +489,70 @@ class IdolPlayer {
         ctx.restore();
     }
 
+    // Default, clean, standard Anime Idol Eyes
     drawAnimeEye(ctx, x, y) {
         ctx.save();
-        // Base Iris: Warm deep amber/brown
-        ctx.fillStyle = '#3a1811';
-        ctx.beginPath();
-        ctx.ellipse(x, y, 3.8, 5.2, 0, 0, Math.PI * 2);
-        ctx.fill();
 
-        // Inner glowing warm amber
-        ctx.fillStyle = '#d85a38';
-        ctx.beginPath();
-        ctx.ellipse(x, y + 1.2, 3.0, 3.0, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Catchlight reflections
+        // 1. Clean white sclera background
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(x - 1, y - 2, 1.6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x + 1.2, y + 1.6, 0.9, 0, Math.PI * 2);
+        ctx.ellipse(x, y, 4.2, 5.0, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Upper eyeliner
-        ctx.strokeStyle = '#260e09';
-        ctx.lineWidth = 1.6;
+        // 2. Outer dark chestnut iris
+        ctx.fillStyle = '#26120e';
         ctx.beginPath();
-        ctx.arc(x, y - 2, 4.2, Math.PI * 1.15, Math.PI * 1.85);
+        ctx.ellipse(x, y, 3.4, 4.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. Lower iris warm amber glow
+        const irisGrad = ctx.createLinearGradient(x, y - 2, x, y + 4.5);
+        irisGrad.addColorStop(0, '#26120e');
+        irisGrad.addColorStop(0.5, '#5c2214');
+        irisGrad.addColorStop(1, '#d85a28');
+        ctx.fillStyle = irisGrad;
+        ctx.beginPath();
+        ctx.ellipse(x, y + 0.5, 3.0, 3.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 4. Centered dark round pupil
+        ctx.fillStyle = '#120504';
+        ctx.beginPath();
+        ctx.ellipse(x, y + 0.3, 1.7, 2.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 5. Classic single top-left crisp round catchlight
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(x - 1.2, y - 1.8, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 6. Subtle tiny secondary rim reflection at bottom right
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+        ctx.beginPath();
+        ctx.arc(x + 1.2, y + 2.0, 0.7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 7. Upper eyelash arch with graceful wing flick
+        ctx.strokeStyle = '#1a0905';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(x, y - 1.5, 4.4, Math.PI * 1.15, Math.PI * 1.88);
+        ctx.stroke();
+
+        ctx.fillStyle = '#1a0905';
+        ctx.beginPath();
+        ctx.moveTo(x + 3.8, y - 3.0);
+        ctx.lineTo(x + 4.8, y - 3.8);
+        ctx.lineTo(x + 3.4, y - 2.2);
+        ctx.closePath();
+        ctx.fill();
+
+        // 8. Soft natural eyebrow
+        ctx.strokeStyle = '#54261f';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(x, y - 6.5, 4.0, Math.PI * 1.2, Math.PI * 1.8);
         ctx.stroke();
 
         ctx.restore();
@@ -811,6 +844,21 @@ class IdolPlayer {
         ctx.bezierCurveTo(x - size / 2, y + (size + topCurveHeight) / 2, x, y + (size + topCurveHeight) / 2, x, y + size);
         ctx.bezierCurveTo(x, y + (size + topCurveHeight) / 2, x + size / 2, y + (size + topCurveHeight) / 2, x + size / 2, y + topCurveHeight);
         ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurveHeight);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    drawMiniStar(ctx, cx, cy, r, points = 5) {
+        const innerR = r * 0.45;
+        ctx.beginPath();
+        for (let i = 0; i < points * 2; i++) {
+            const rad = (i * Math.PI) / points - Math.PI / 2;
+            const dist = (i % 2 === 0) ? r : innerR;
+            const px = cx + Math.cos(rad) * dist;
+            const py = cy + Math.sin(rad) * dist;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
         ctx.closePath();
         ctx.fill();
     }
