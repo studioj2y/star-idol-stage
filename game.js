@@ -438,7 +438,7 @@ class StarIdolGame {
                         this.screenShake = 4;
                         window.soundManager.playSpring();
                         this.createSparkleBurst(plat.x + plat.width / 2, plat.y, '#ffd54f', 16);
-                        this.addFloatingText(this.player.x, this.player.y - 30, 'SUPER JUMP!', '#ffea00');
+                        this.addFloatingText(this.player.x, this.player.y - 30, '★ スーパージャンプ！ ★', '#ffea00');
                     } else if (plat.type === 'fragile') {
                         plat.breakTimer = 0.45;
                         this.createSparkleBurst(this.player.x, plat.y + 5, '#ffffff', 8);
@@ -581,12 +581,12 @@ class StarIdolGame {
 
         // Ambient random crowd call bubbles from audience
         this.ambientCallTimer += dt;
-        if (this.ambientCallTimer > 1.6) {
+        if (this.ambientCallTimer > 2.0) {
             this.ambientCallTimer = 0;
             this.spawnCrowdCall();
         }
 
-        // Update crowd call speech bubbles with dynamic pop-in, float, sway & smooth fade
+        // Update crowd call speech bubbles (smooth float & fade)
         for (let i = this.crowdCalls.length - 1; i >= 0; i--) {
             const c = this.crowdCalls[i];
             c.age += dt;
@@ -596,30 +596,23 @@ class StarIdolGame {
             }
 
             const progress = c.age / c.duration;
-
-            // 1. Smooth Fade-in (first ~0.5s), Steady Hover (~2.5s), and Smooth Fade-out (~1.0s)
-            const fadeInTime = 0.12;
-            const fadeOutTime = 0.72;
+            const fadeInTime = 0.15;
+            const fadeOutTime = 0.75;
             if (progress < fadeInTime) {
                 const t = progress / fadeInTime;
                 c.alpha = t;
-                // Pop-in bounce scale
-                c.scale = Math.sin(t * Math.PI * 0.5) * 1.12;
+                c.scale = Math.sin(t * Math.PI * 0.5) * 1.08;
             } else if (progress > fadeOutTime) {
                 const t = (progress - fadeOutTime) / (1.0 - fadeOutTime);
                 c.alpha = Math.max(0, 1.0 - t);
                 c.scale = 1.0;
             } else {
                 c.alpha = 1.0;
-                // Gentle breathing pulse
-                c.scale = 1.0 + Math.sin(c.age * 3.5) * 0.04;
+                c.scale = 1.0 + Math.sin(c.age * 2.8) * 0.025;
             }
 
-            // 2. Slow, graceful upward float
-            c.y -= dt * 14;
-
-            // 3. Gentle horizontal floating sway
-            c.x = c.startX + Math.sin(c.seed + c.age * 2.2) * 8;
+            c.y -= dt * 15;
+            c.x = c.startX + Math.sin(c.seed + c.age * 2.0) * 6;
         }
 
         // Fever ambient sparkles
@@ -680,7 +673,7 @@ class StarIdolGame {
             this.createSparkleBurst(item.x, item.y, '#ff4081', 25);
             window.soundManager.playFever();
             window.soundManager.playNaatanCall();
-            this.addFloatingText(item.x, item.y - 20, '★ なぁたんフィーバー！ NAATAN FEVER! ★', '#ff4081');
+            this.addFloatingText(item.x, item.y - 20, '★ なぁたんフィーバー突入！ ★', '#ff4081');
             this.spawnCrowdCall('なぁたん！', '💖', true);
             this.spawnCrowdCall('もっと！', '🔥', true);
         } else if (item.type === 'wings') {
@@ -696,10 +689,10 @@ class StarIdolGame {
         if (this.combo > 1) {
             if (this.combo % 4 === 2) {
                 window.soundManager.playMottoCall();
-                this.spawnCrowdCall('もっと！ (motto!)', '🔥');
+                this.spawnCrowdCall('もっと！もっと！', '🔥');
             } else if (this.combo % 4 === 0) {
                 window.soundManager.playNaatanCall();
-                this.spawnCrowdCall('なぁたん！ (naatan!)', '💖');
+                this.spawnCrowdCall('なぁたん！', '💖');
             }
         }
 
@@ -711,11 +704,11 @@ class StarIdolGame {
         // Combo hype notification
         if (this.combo > 1 && this.combo % 5 === 0) {
             const phrases = [
-                'もっと！ MOTTO!',
-                'なぁたん！ NAATAN!',
+                'もっと！もっと！',
                 '超絶可愛い！なぁたん！',
-                '世界で一番！なぁたん！',
-                'NAATAN LOVE! 大好き！'
+                'なぁたん！大好き！',
+                '世界で一番愛してる！',
+                'なぁたんしか勝たん！'
             ];
             const phrase = phrases[Math.min(Math.floor(this.combo / 5) - 1, phrases.length - 1)];
             this.addFloatingText(this.player.x, this.player.y - 45, `${phrase} x${this.combo}`, '#ff4081');
@@ -726,7 +719,7 @@ class StarIdolGame {
     triggerCheerSurge() {
         this.cheerMeter = 0;
         window.soundManager.playNaatanCall();
-        this.addFloatingText(this.width / 2, this.cameraY + 220, '★ なぁたんコール最高潮！ MOTTO! MOTTO! ★', '#ffeb3b');
+        this.addFloatingText(this.width / 2, this.cameraY + 220, '★ なぁたんコール最高潮！もっと！もっと！ ★', '#ffeb3b');
         this.spawnCrowdCall('超絶可愛い！なぁたん！', '💖', true);
         this.spawnCrowdCall('もっと！もっと！', '🔥', true);
         // Spawn shower of falling stars
@@ -906,48 +899,71 @@ class StarIdolGame {
     }
 
     updateHUD() {
-        const scoreElem = document.getElementById('hudScore');
-        const altElem = document.getElementById('hudAltitude');
-        const livesElem = document.getElementById('hudLives');
-        const comboElem = document.getElementById('hudCombo');
-        const cheerBar = document.getElementById('cheerFill');
-        const stageElem = document.getElementById('hudStageName');
-
-        if (scoreElem) scoreElem.textContent = this.score;
-        if (altElem && this.currentStage) {
-            const goal = this.currentStage.goalAltitude || 500;
-            altElem.textContent = `${this.altitude}m / ${goal}m`;
-        }
-        if (stageElem && this.currentStage) {
-            stageElem.textContent = `${this.currentStage.icon} ${this.currentStage.name}`;
-        }
-        if (livesElem) livesElem.textContent = '❤'.repeat(Math.max(0, this.lives));
-        if (comboElem) {
-            comboElem.textContent = this.combo > 1 ? `x${this.combo} COMBO!` : '';
-        }
-        if (cheerBar) {
-            cheerBar.style.width = `${Math.min(100, this.cheerMeter)}%`;
+        if (this._lastScore !== this.score) {
+            const scoreElem = document.getElementById('hudScore');
+            if (scoreElem) scoreElem.textContent = this.score;
+            this._lastScore = this.score;
         }
 
-        const avatarMood = document.getElementById('avatarMood');
-        if (avatarMood) {
-            if (this.player.feverTimer > 0) {
-                avatarMood.textContent = '🌟 FEVER!';
-                avatarMood.style.color = '#ffea00';
-            } else if (this.combo >= 4) {
-                avatarMood.textContent = '😉 Wink!';
-                avatarMood.style.color = '#ff80ab';
-            } else if (this.lives === 1) {
-                avatarMood.textContent = '🥺 Ganba!';
-                avatarMood.style.color = '#ff5252';
-            } else {
-                avatarMood.textContent = '🎀 なぁたん';
-                avatarMood.style.color = '#ff80ab';
+        if (this._lastAlt !== this.altitude) {
+            const altElem = document.getElementById('hudAltitude');
+            if (altElem && this.currentStage) {
+                const goal = this.currentStage.goalAltitude || 500;
+                altElem.textContent = `${this.altitude}m / ${goal}m`;
             }
+            this._lastAlt = this.altitude;
         }
 
-        if (window.idolShop) {
-            window.idolShop.updateUI();
+        if (this._lastStage !== this.currentStageIndex) {
+            const stageElem = document.getElementById('hudStageName');
+            if (stageElem && this.currentStage) {
+                stageElem.textContent = `${this.currentStage.icon} ${this.currentStage.name}`;
+            }
+            this._lastStage = this.currentStageIndex;
+        }
+
+        if (this._lastLives !== this.lives) {
+            const livesElem = document.getElementById('hudLives');
+            if (livesElem) livesElem.textContent = '❤'.repeat(Math.max(0, this.lives));
+            this._lastLives = this.lives;
+        }
+
+        if (this._lastCombo !== this.combo) {
+            const comboElem = document.getElementById('hudCombo');
+            if (comboElem) {
+                comboElem.textContent = this.combo > 1 ? `x${this.combo} COMBO!` : '';
+            }
+            this._lastCombo = this.combo;
+        }
+
+        const cheerPercent = Math.min(100, Math.floor(this.cheerMeter));
+        if (this._lastCheer !== cheerPercent) {
+            const cheerBar = document.getElementById('cheerFill');
+            if (cheerBar) {
+                cheerBar.style.width = `${cheerPercent}%`;
+            }
+            this._lastCheer = cheerPercent;
+        }
+
+        const mood = this.player.feverTimer > 0 ? 'fever' : (this.combo >= 4 ? 'wink' : (this.lives === 1 ? 'low' : 'normal'));
+        if (this._lastMood !== mood) {
+            const avatarMood = document.getElementById('avatarMood');
+            if (avatarMood) {
+                if (mood === 'fever') {
+                    avatarMood.textContent = '🌟 FEVER!';
+                    avatarMood.style.color = '#ffea00';
+                } else if (mood === 'wink') {
+                    avatarMood.textContent = '😉 Wink!';
+                    avatarMood.style.color = '#ff80ab';
+                } else if (mood === 'low') {
+                    avatarMood.textContent = '🥺 Ganba!';
+                    avatarMood.style.color = '#ff5252';
+                } else {
+                    avatarMood.textContent = '🎀 なぁたん';
+                    avatarMood.style.color = '#ff80ab';
+                }
+            }
+            this._lastMood = mood;
         }
     }
 
@@ -1196,7 +1212,7 @@ class StarIdolGame {
     renderStageLighting(ctx) {
         const time = Date.now() * 0.001;
 
-        // Spotlights swinging from ceiling/floor
+        // Spotlights swinging from ceiling
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
         for (const spot of this.spotlights) {
@@ -1219,70 +1235,77 @@ class StarIdolGame {
         }
         ctx.restore();
 
-        // Audience Penlights swaying at the bottom
+        // Audience Penlights swaying at the bottom (Fast 2-pass glow, 0 blur cost!)
         ctx.save();
         const isFever = this.player.feverTimer > 0;
         const penSpeedMult = isFever ? 1.8 : (this.combo > 5 ? 1.35 : 1.0);
+
+        // Pass 1: Soft wide glow
+        ctx.globalAlpha = 0.35;
+        ctx.lineWidth = 6;
         for (const p of this.penlights) {
             const sway = Math.sin(time * p.speed * penSpeedMult + p.phase) * (isFever ? 16 : 12);
-            const pColor = isFever ? '#ff1744' : p.color;
-            ctx.strokeStyle = pColor;
-            ctx.shadowColor = pColor;
-            ctx.shadowBlur = 10;
-            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = isFever ? '#ff1744' : p.color;
             ctx.beginPath();
             ctx.moveTo(p.x, p.baseY);
             ctx.lineTo(p.x + sway, p.baseY - p.height);
             ctx.stroke();
+        }
 
-            // Penlight tip glow
+        // Pass 2: Sharp vibrant core
+        ctx.globalAlpha = 1.0;
+        ctx.lineWidth = 2.5;
+        for (const p of this.penlights) {
+            const sway = Math.sin(time * p.speed * penSpeedMult + p.phase) * (isFever ? 16 : 12);
+            const tipX = p.x + sway;
+            const tipY = p.baseY - p.height;
+            ctx.strokeStyle = isFever ? '#ff5252' : p.color;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.baseY);
+            ctx.lineTo(tipX, tipY);
+            ctx.stroke();
+
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.arc(p.x + sway, p.baseY - p.height, 2.5, 0, Math.PI * 2);
+            ctx.arc(tipX, tipY, 2.5, 0, Math.PI * 2);
             ctx.fill();
         }
         ctx.restore();
 
-        // Audience Call Speech Bubbles with rich neon capsules & icons
+        // Audience Call Speech Bubbles (precomputed dimensions, crisp neon capsules, no blur lag)
         for (const c of this.crowdCalls) {
             ctx.save();
-            ctx.globalAlpha = Math.max(0, Math.min(1, c.alpha));
-
+            const a = Math.max(0, Math.min(1, c.alpha));
             ctx.translate(c.x, c.y);
             ctx.scale(c.scale, c.scale);
 
-            const font = c.isHype 
-                ? 'bold 13.5px "Fredoka One", "M PLUS Rounded 1c", sans-serif'
-                : 'bold 12px "Fredoka One", "M PLUS Rounded 1c", sans-serif';
-            ctx.font = font;
-
-            const fullText = (c.icon ? c.icon + ' ' : '') + c.text;
-            const textWidth = ctx.measureText(fullText).width;
-            const padX = 10;
-            const bw = textWidth + padX * 2;
-            const bh = 24;
+            const bw = c.bw || 85;
+            const bh = c.bh || 24;
             const bx = -bw / 2;
             const by = -bh / 2;
 
-            // Neon Shadow Glow
-            ctx.shadowColor = c.color;
-            ctx.shadowBlur = c.isHype ? 16 : 9;
+            // Outer soft neon halo border
+            ctx.globalAlpha = a * 0.4;
+            ctx.strokeStyle = c.color;
+            ctx.lineWidth = c.isHype ? 4 : 3;
+            ctx.beginPath();
+            ctx.roundRect(bx - 1.5, by - 1.5, bw + 3, bh + 3, 13);
+            ctx.stroke();
 
-            // Pill Capsule Background
-            const bgGrad = ctx.createLinearGradient(0, by, 0, by + bh);
-            bgGrad.addColorStop(0, 'rgba(32, 10, 48, 0.94)');
-            bgGrad.addColorStop(1, 'rgba(16, 4, 26, 0.96)');
-            ctx.fillStyle = bgGrad;
+            // Capsule dark background
+            ctx.globalAlpha = a * 0.95;
+            ctx.fillStyle = 'rgba(20, 6, 32, 0.96)';
             ctx.beginPath();
             ctx.roundRect(bx, by, bw, bh, 12);
             ctx.fill();
 
-            // Neon Outline
+            // Inner crisp neon outline
+            ctx.globalAlpha = a;
             ctx.strokeStyle = c.color;
-            ctx.lineWidth = c.isHype ? 2.4 : 1.6;
+            ctx.lineWidth = c.isHype ? 2.2 : 1.5;
             ctx.stroke();
 
-            // Small speech tail pointing down toward audience
+            // Speech tail
             ctx.fillStyle = c.color;
             ctx.beginPath();
             ctx.moveTo(-3, by + bh);
@@ -1291,12 +1314,14 @@ class StarIdolGame {
             ctx.closePath();
             ctx.fill();
 
-            // Text
-            ctx.shadowBlur = c.isHype ? 8 : 4;
+            // Japanese text
+            ctx.font = c.isHype 
+                ? 'bold 13px "Fredoka One", "M PLUS Rounded 1c", sans-serif'
+                : 'bold 12px "Fredoka One", "M PLUS Rounded 1c", sans-serif';
             ctx.fillStyle = c.isHype ? '#fff59d' : '#ffffff';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(fullText, 0, 0);
+            ctx.fillText(c.fullText, 0, 0);
 
             ctx.restore();
         }
@@ -1306,17 +1331,17 @@ class StarIdolGame {
         if (!text) {
             const defaultCalls = [
                 { t: 'なぁたん！', i: '📣' },
-                { t: 'もっと！', i: '🔥' },
-                { t: 'motto!', i: '✨' },
-                { t: 'naatan!', i: '💖' },
-                { t: '超絶可愛い！', i: '🎀' },
-                { t: '大好きー！', i: '💖' },
-                { t: 'L・O・V・E なぁたん！', i: '⭐' },
-                { t: '世界で一番！', i: '👑' },
+                { t: 'もっと！もっと！', i: '🔥' },
+                { t: '超絶可愛い！なぁたん！', i: '🎀' },
+                { t: 'なぁたーん！大好きー！', i: '💖' },
+                { t: '世界で一番愛してる！', i: '👑' },
                 { t: '輝いてるよ！', i: '🌟' },
+                { t: 'お前が一番！', i: '✨' },
                 { t: 'ふーふー！', i: '🎉' },
                 { t: 'はい！はい！はい！', i: '📢' },
-                { t: 'なぁたんしか勝たん！', i: '💫' }
+                { t: 'なぁたんしか勝たん！', i: '💫' },
+                { t: 'ずっと推しだよ！', i: '⭐' },
+                { t: '銀河一可愛い！', i: '🌌' }
             ];
             const pick = defaultCalls[Math.floor(Math.random() * defaultCalls.length)];
             text = pick.t;
@@ -1326,6 +1351,13 @@ class StarIdolGame {
         const randPen = this.penlights[Math.floor(Math.random() * this.penlights.length)];
         const startX = randPen ? randPen.x : (Math.random() * (this.width - 120) + 60);
         const startY = this.height - 56 - (Math.random() * 22);
+        const fullText = (icon ? icon + ' ' : '') + text;
+
+        // Precalculate width once at spawn time
+        this.ctx.font = isHype 
+            ? 'bold 13px "Fredoka One", "M PLUS Rounded 1c", sans-serif'
+            : 'bold 12px "Fredoka One", "M PLUS Rounded 1c", sans-serif';
+        const textWidth = this.ctx.measureText(fullText).width;
 
         this.crowdCalls.push({
             startX: Math.max(50, Math.min(this.width - 50, startX)),
@@ -1334,16 +1366,19 @@ class StarIdolGame {
             startY: startY,
             text: text,
             icon: icon || '📣',
+            fullText: fullText,
+            bw: Math.round(textWidth + 20),
+            bh: 24,
             isHype: isHype,
             color: isHype ? '#ffd700' : (randPen ? randPen.color : '#ff4081'),
             age: 0,
-            duration: isHype ? 4.6 : (3.8 + Math.random() * 0.8),
+            duration: isHype ? 3.2 : (2.5 + Math.random() * 0.5),
             seed: Math.random() * 100,
             scale: 0.1,
             alpha: 0
         });
 
-        if (this.crowdCalls.length > 14) {
+        if (this.crowdCalls.length > 5) {
             this.crowdCalls.shift();
         }
     }

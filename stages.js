@@ -123,8 +123,7 @@ class StageRenderer {
         const tx = w - 110;
         const ty = groundY - 210;
         ctx.fillStyle = '#ff1744';
-        ctx.shadowColor = '#ff5252';
-        ctx.shadowBlur = 12;
+        // Tokyo tower neon
         // Tower spire
         ctx.fillRect(tx + 28, ty, 4, 70);
         // Middle deck
@@ -148,8 +147,7 @@ class StageRenderer {
         const sx = 60;
         const sy = groundY - 250;
         ctx.fillStyle = '#80d8ff';
-        ctx.shadowColor = '#00e5ff';
-        ctx.shadowBlur = 10;
+        // Skytree neon
         ctx.fillRect(sx + 14, sy, 3, 90);
         ctx.beginPath();
         ctx.moveTo(sx + 5, sy + 90);
@@ -175,8 +173,7 @@ class StageRenderer {
         const cx = w / 2 - 25;
         const cy = groundY - 200;
         ctx.fillStyle = '#ffd54f';
-        ctx.shadowColor = '#ffea00';
-        ctx.shadowBlur = 12;
+        // Tsutenkaku neon
         ctx.fillRect(cx + 23, cy, 4, 50);
         ctx.fillRect(cx + 10, cy + 50, 30, 24);
         ctx.fillRect(cx + 4, cy + 74, 42, 60);

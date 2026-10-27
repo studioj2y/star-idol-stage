@@ -223,13 +223,11 @@ class IdolPlayer {
     draw(ctx) {
         this.initPattern(ctx);
 
-        // Draw sparkle trail behind player
+        // Draw sparkle trail behind player (fast, no shadowBlur lag)
         for (const p of this.trail) {
             ctx.save();
             ctx.globalAlpha = p.alpha;
             ctx.fillStyle = p.color;
-            ctx.shadowColor = p.color;
-            ctx.shadowBlur = 6;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             ctx.fill();
