@@ -11,7 +11,10 @@ const TOUR_STAGES = [
         bgColorBottom: '#5c1775',
         landmarkName: 'Tokyo Tower & Skytree',
         clearReward: 300,
-        skyType: 'tokyo'
+        skyType: 'tokyo',
+        chekiSign: 'なぁたん ♡ Tokyo Debut!',
+        chekiNote: '「渋谷から世界へ！みんなのコール、届いたよ♡」',
+        chekiStamp: 'TOKYO DEBUT 🗼'
     },
     {
         id: 'osaka',
@@ -24,7 +27,10 @@ const TOUR_STAGES = [
         bgColorBottom: '#e65100',
         landmarkName: 'Tsutenkaku & Dotonbori',
         clearReward: 400,
-        skyType: 'osaka'
+        skyType: 'osaka',
+        chekiSign: 'なぁたん ♡ めっちゃ好きやねん！',
+        chekiNote: '「道頓堀の熱気サイコー！みんな、おおきに〜♡」',
+        chekiStamp: 'OSAKA FES 🏮'
     },
     {
         id: 'paris',
@@ -37,7 +43,10 @@ const TOUR_STAGES = [
         bgColorBottom: '#ad1457',
         landmarkName: 'Eiffel Tower Twilight',
         clearReward: 500,
-        skyType: 'paris'
+        skyType: 'paris',
+        chekiSign: 'なぁたん ♡ Merci Paris!',
+        chekiNote: '「エッフェル塔の夕暮れ、みんなと見れて幸せ♡」',
+        chekiStamp: 'PARIS LIVE ✨'
     },
     {
         id: 'newyork',
@@ -50,7 +59,10 @@ const TOUR_STAGES = [
         bgColorBottom: '#00695c',
         landmarkName: 'Manhattan Skyline & Marquee',
         clearReward: 600,
-        skyType: 'newyork'
+        skyType: 'newyork',
+        chekiSign: 'なぁたん ♡ Broadway Dream!',
+        chekiNote: '「タイムズスクエアに響く歌声！Dreams Come True★」',
+        chekiStamp: 'BROADWAY 🗽'
     },
     {
         id: 'galaxy',
@@ -64,7 +76,10 @@ const TOUR_STAGES = [
         landmarkName: 'Cosmic Nebula & Aurora',
         clearReward: 1000,
         skyType: 'galaxy',
-        isFinal: true
+        isFinal: true,
+        chekiSign: 'なぁたん ♡ Galaxy Tour Finale!',
+        chekiNote: '「全宇宙へ愛を込めて！世界一幸せなアイドルだよ★」',
+        chekiStamp: 'COSMIC QUEEN 👑'
     }
 ];
 

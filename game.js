@@ -581,19 +581,45 @@ class StarIdolGame {
 
         // Ambient random crowd call bubbles from audience
         this.ambientCallTimer += dt;
-        if (this.ambientCallTimer > 2.8) {
+        if (this.ambientCallTimer > 1.6) {
             this.ambientCallTimer = 0;
             this.spawnCrowdCall();
         }
 
-        // Update crowd call speech bubbles
+        // Update crowd call speech bubbles with dynamic pop-in, float, sway & smooth fade
         for (let i = this.crowdCalls.length - 1; i >= 0; i--) {
             const c = this.crowdCalls[i];
-            c.y += c.vy;
-            c.alpha -= dt * 0.75;
-            if (c.alpha <= 0) {
+            c.age += dt;
+            if (c.age >= c.duration) {
                 this.crowdCalls.splice(i, 1);
+                continue;
             }
+
+            const progress = c.age / c.duration;
+
+            // 1. Smooth Fade-in (first ~0.5s), Steady Hover (~2.5s), and Smooth Fade-out (~1.0s)
+            const fadeInTime = 0.12;
+            const fadeOutTime = 0.72;
+            if (progress < fadeInTime) {
+                const t = progress / fadeInTime;
+                c.alpha = t;
+                // Pop-in bounce scale
+                c.scale = Math.sin(t * Math.PI * 0.5) * 1.12;
+            } else if (progress > fadeOutTime) {
+                const t = (progress - fadeOutTime) / (1.0 - fadeOutTime);
+                c.alpha = Math.max(0, 1.0 - t);
+                c.scale = 1.0;
+            } else {
+                c.alpha = 1.0;
+                // Gentle breathing pulse
+                c.scale = 1.0 + Math.sin(c.age * 3.5) * 0.04;
+            }
+
+            // 2. Slow, graceful upward float
+            c.y -= dt * 14;
+
+            // 3. Gentle horizontal floating sway
+            c.x = c.startX + Math.sin(c.seed + c.age * 2.2) * 8;
         }
 
         // Fever ambient sparkles
@@ -655,8 +681,8 @@ class StarIdolGame {
             window.soundManager.playFever();
             window.soundManager.playNaatanCall();
             this.addFloatingText(item.x, item.y - 20, '★ なぁたんフィーバー！ NAATAN FEVER! ★', '#ff4081');
-            this.spawnCrowdCall('なぁたん！');
-            this.spawnCrowdCall('もっと！');
+            this.spawnCrowdCall('なぁたん！', '💖', true);
+            this.spawnCrowdCall('もっと！', '🔥', true);
         } else if (item.type === 'wings') {
             this.player.hasWings = true;
             this.player.wingsTimer = 8.0;
@@ -670,10 +696,10 @@ class StarIdolGame {
         if (this.combo > 1) {
             if (this.combo % 4 === 2) {
                 window.soundManager.playMottoCall();
-                this.spawnCrowdCall('もっと！ (motto!)');
+                this.spawnCrowdCall('もっと！ (motto!)', '🔥');
             } else if (this.combo % 4 === 0) {
                 window.soundManager.playNaatanCall();
-                this.spawnCrowdCall('なぁたん！ (naatan!)');
+                this.spawnCrowdCall('なぁたん！ (naatan!)', '💖');
             }
         }
 
@@ -693,7 +719,7 @@ class StarIdolGame {
             ];
             const phrase = phrases[Math.min(Math.floor(this.combo / 5) - 1, phrases.length - 1)];
             this.addFloatingText(this.player.x, this.player.y - 45, `${phrase} x${this.combo}`, '#ff4081');
-            this.spawnCrowdCall(phrase);
+            this.spawnCrowdCall(phrase, '👑', true);
         }
     }
 
@@ -701,8 +727,8 @@ class StarIdolGame {
         this.cheerMeter = 0;
         window.soundManager.playNaatanCall();
         this.addFloatingText(this.width / 2, this.cameraY + 220, '★ なぁたんコール最高潮！ MOTTO! MOTTO! ★', '#ffeb3b');
-        this.spawnCrowdCall('超絶可愛い！なぁたん！');
-        this.spawnCrowdCall('もっと！もっと！');
+        this.spawnCrowdCall('超絶可愛い！なぁたん！', '💖', true);
+        this.spawnCrowdCall('もっと！もっと！', '🔥', true);
         // Spawn shower of falling stars
         for (let i = 0; i < 8; i++) {
             this.collectibles.push({
@@ -745,10 +771,18 @@ class StarIdolGame {
         if (clearReward) clearReward.textContent = `+${reward} ⭐ 巡演报酬到手！`;
         if (clearScore) clearScore.textContent = this.score;
 
+        // Update Polaroid City Handwritten Notes & Stamp
+        const signEl = document.getElementById('clearChekiSign');
+        const noteEl = document.getElementById('clearChekiNote');
+        const stampEl = document.getElementById('clearChekiStamp');
+        if (signEl && this.currentStage.chekiSign) signEl.textContent = this.currentStage.chekiSign;
+        if (noteEl && this.currentStage.chekiNote) noteEl.textContent = this.currentStage.chekiNote;
+        if (stampEl && this.currentStage.chekiStamp) stampEl.textContent = this.currentStage.chekiStamp;
+
         // Draw 16-bit Pixel Art Cheki Portrait
         const chekiCanvas = document.getElementById('pixelChekiCanvas');
         if (chekiCanvas && window.PixelArtCheki) {
-            window.PixelArtCheki.drawToCanvas(chekiCanvas, this.currentStage, this.player.equippedProp);
+            window.PixelArtCheki.drawToCanvas(chekiCanvas, this.currentStage, this.player.equippedProp, false);
         }
 
         // Update Next Stage Button
@@ -835,10 +869,10 @@ class StarIdolGame {
         const stamp = document.getElementById('chekiStamp');
         if (stamp) stamp.textContent = shortRank;
 
-        // Render 16-bit Pixel Art Cheki Portrait for Game Over
+        // Render 16-bit Pixel Art Cheki Portrait for Game Over (Encore Theme)
         const chekiCanvas = document.getElementById('pixelChekiGameOverCanvas');
         if (chekiCanvas && window.PixelArtCheki) {
-            window.PixelArtCheki.drawToCanvas(chekiCanvas, this.currentStage, this.player.equippedProp);
+            window.PixelArtCheki.drawToCanvas(chekiCanvas, this.currentStage, this.player.equippedProp, true);
         }
 
         document.getElementById('gameOverOverlay').style.display = 'flex';
@@ -1209,66 +1243,109 @@ class StarIdolGame {
         }
         ctx.restore();
 
-        // Audience Call Speech Bubbles ("なぁたん！", "もっと！")
+        // Audience Call Speech Bubbles with rich neon capsules & icons
         for (const c of this.crowdCalls) {
             ctx.save();
             ctx.globalAlpha = Math.max(0, Math.min(1, c.alpha));
-            ctx.font = 'bold 12px "Fredoka One", "M PLUS Rounded 1c", sans-serif';
-            const textWidth = ctx.measureText(c.text).width;
-            const px = c.x - textWidth / 2;
-            const py = c.y;
 
-            // Speech bubble background
-            ctx.fillStyle = 'rgba(24, 6, 38, 0.9)';
-            ctx.strokeStyle = c.color;
-            ctx.lineWidth = 1.5;
+            ctx.translate(c.x, c.y);
+            ctx.scale(c.scale, c.scale);
+
+            const font = c.isHype 
+                ? 'bold 13.5px "Fredoka One", "M PLUS Rounded 1c", sans-serif'
+                : 'bold 12px "Fredoka One", "M PLUS Rounded 1c", sans-serif';
+            ctx.font = font;
+
+            const fullText = (c.icon ? c.icon + ' ' : '') + c.text;
+            const textWidth = ctx.measureText(fullText).width;
+            const padX = 10;
+            const bw = textWidth + padX * 2;
+            const bh = 24;
+            const bx = -bw / 2;
+            const by = -bh / 2;
+
+            // Neon Shadow Glow
+            ctx.shadowColor = c.color;
+            ctx.shadowBlur = c.isHype ? 16 : 9;
+
+            // Pill Capsule Background
+            const bgGrad = ctx.createLinearGradient(0, by, 0, by + bh);
+            bgGrad.addColorStop(0, 'rgba(32, 10, 48, 0.94)');
+            bgGrad.addColorStop(1, 'rgba(16, 4, 26, 0.96)');
+            ctx.fillStyle = bgGrad;
             ctx.beginPath();
-            ctx.roundRect(px - 8, py - 14, textWidth + 16, 20, 6);
+            ctx.roundRect(bx, by, bw, bh, 12);
             ctx.fill();
+
+            // Neon Outline
+            ctx.strokeStyle = c.color;
+            ctx.lineWidth = c.isHype ? 2.4 : 1.6;
             ctx.stroke();
 
-            // Bubble small arrow
+            // Small speech tail pointing down toward audience
             ctx.fillStyle = c.color;
             ctx.beginPath();
-            ctx.moveTo(c.x - 3, py + 6);
-            ctx.lineTo(c.x + 3, py + 6);
-            ctx.lineTo(c.x, py + 10);
+            ctx.moveTo(-3, by + bh);
+            ctx.lineTo(3, by + bh);
+            ctx.lineTo(0, by + bh + 4);
             ctx.closePath();
             ctx.fill();
 
-            // Bubble text
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowColor = c.color;
-            ctx.shadowBlur = 6;
+            // Text
+            ctx.shadowBlur = c.isHype ? 8 : 4;
+            ctx.fillStyle = c.isHype ? '#fff59d' : '#ffffff';
             ctx.textAlign = 'center';
-            ctx.fillText(c.text, c.x, py);
+            ctx.textBaseline = 'middle';
+            ctx.fillText(fullText, 0, 0);
+
             ctx.restore();
         }
     }
 
-    spawnCrowdCall(text) {
+    spawnCrowdCall(text = null, icon = null, isHype = false) {
         if (!text) {
             const defaultCalls = [
-                'なぁたん！',
-                'もっと！',
-                'motto!',
-                'naatan!',
-                '超絶可愛い！',
-                '大好きー！',
-                'L・O・V・E なぁたん！'
+                { t: 'なぁたん！', i: '📣' },
+                { t: 'もっと！', i: '🔥' },
+                { t: 'motto!', i: '✨' },
+                { t: 'naatan!', i: '💖' },
+                { t: '超絶可愛い！', i: '🎀' },
+                { t: '大好きー！', i: '💖' },
+                { t: 'L・O・V・E なぁたん！', i: '⭐' },
+                { t: '世界で一番！', i: '👑' },
+                { t: '輝いてるよ！', i: '🌟' },
+                { t: 'ふーふー！', i: '🎉' },
+                { t: 'はい！はい！はい！', i: '📢' },
+                { t: 'なぁたんしか勝たん！', i: '💫' }
             ];
-            text = defaultCalls[Math.floor(Math.random() * defaultCalls.length)];
+            const pick = defaultCalls[Math.floor(Math.random() * defaultCalls.length)];
+            text = pick.t;
+            icon = pick.i;
         }
+
         const randPen = this.penlights[Math.floor(Math.random() * this.penlights.length)];
-        const x = randPen ? randPen.x : (Math.random() * (this.width - 80) + 40);
+        const startX = randPen ? randPen.x : (Math.random() * (this.width - 120) + 60);
+        const startY = this.height - 56 - (Math.random() * 22);
+
         this.crowdCalls.push({
-            x: Math.max(40, Math.min(this.width - 60, x)),
-            y: this.height - 35,
+            startX: Math.max(50, Math.min(this.width - 50, startX)),
+            x: Math.max(50, Math.min(this.width - 50, startX)),
+            y: startY,
+            startY: startY,
             text: text,
-            vy: -1.0 - Math.random() * 0.8,
-            alpha: 1,
-            color: randPen ? randPen.color : '#ff4081'
+            icon: icon || '📣',
+            isHype: isHype,
+            color: isHype ? '#ffd700' : (randPen ? randPen.color : '#ff4081'),
+            age: 0,
+            duration: isHype ? 4.6 : (3.8 + Math.random() * 0.8),
+            seed: Math.random() * 100,
+            scale: 0.1,
+            alpha: 0
         });
+
+        if (this.crowdCalls.length > 14) {
+            this.crowdCalls.shift();
+        }
     }
 
     drawStar(ctx, cx, cy, r, points = 5) {
