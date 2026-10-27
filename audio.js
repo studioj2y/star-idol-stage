@@ -268,6 +268,25 @@ class SoundManager {
         });
     }
 
+    // Stage Clear / Grand Tour Victory Fanfare!
+    playVictoryFanfare() {
+        if (this.muted) return;
+        this.init();
+        const fanNotes = [
+            523.25, 523.25, 523.25, 659.25, 783.99, 1046.50
+        ];
+        const times = [0, 110, 220, 330, 440, 600];
+        fanNotes.forEach((f, i) => {
+            setTimeout(() => {
+                this.playTone(f, 'square', i === fanNotes.length - 1 ? 0.6 : 0.16, 0.28, 0.01);
+            }, times[i]);
+        });
+        setTimeout(() => {
+            this.playCrowdCheer();
+            this.playNaatanCall();
+        }, 700);
+    }
+
     // Game Over jingle
     playGameOver() {
         if (this.muted) return;

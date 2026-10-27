@@ -17,7 +17,7 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
     };
 }
 
-// Main Game Loop, Stage Generator, Particles, HUD, and Mechanics
+// Main Game Loop, Tour Stages, Platforms, HUD, and City Clear Mechanics
 class StarIdolGame {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
@@ -31,7 +31,19 @@ class StarIdolGame {
 
         this.keys = {};
         this.lastTime = 0;
-        this.state = 'START'; // 'START', 'PLAYING', 'PAUSED', 'GAMEOVER'
+        this.state = 'START'; // 'START', 'PLAYING', 'PAUSED', 'CLEAR', 'GAMEOVER'
+
+        // Tour Stage System
+        this.currentStageIndex = parseInt(localStorage.getItem('star_idol_stage_index') || '0', 10);
+        if (window.TOUR_STAGES && this.currentStageIndex >= window.TOUR_STAGES.length) {
+            this.currentStageIndex = 0;
+        }
+        this.currentStage = (window.TOUR_STAGES && window.TOUR_STAGES[this.currentStageIndex]) ? window.TOUR_STAGES[this.currentStageIndex] : {
+            id: 'tokyo', name: '東京 · 渋谷 STAGE', icon: '🗼', goalAltitude: 500, clearReward: 300,
+            bgColorTop: '#120529', bgColorMid: '#2e0e4e', bgColorBottom: '#5c1775'
+        };
+        this.stageCleared = false;
+        this.finalPlatformSpawned = false;
 
         // Game Stats
         this.score = 0;
@@ -56,7 +68,6 @@ class StarIdolGame {
         this.collectibles = [];
         this.particles = [];
         this.floatingTexts = [];
-        this.crowdCalls = [];
         this.spotlights = [];
         this.penlights = []; // Crowd lightsticks
         this.crowdCalls = []; // Audience cheering call bubbles
@@ -172,6 +183,7 @@ class StarIdolGame {
         bindTouch(btnRight, 'ArrowRight');
         bindTouch(btnJump, 'Space');
 
+        // Start Buttons
         const startOverlay = document.getElementById('startOverlay');
         const startBtn = document.getElementById('startBtn');
         if (startBtn) {
@@ -181,7 +193,8 @@ class StarIdolGame {
             });
         }
         if (startOverlay) {
-            startOverlay.addEventListener('click', () => {
+            startOverlay.addEventListener('click', (e) => {
+                if (e.target.id === 'startShopBtn') return;
                 if (this.state === 'START') this.startGame();
             });
         }
@@ -191,17 +204,54 @@ class StarIdolGame {
             restartBtn.addEventListener('click', () => this.startGame());
         }
 
+        // Tour Stage Clear Buttons
+        const nextStageBtn = document.getElementById('nextStageBtn');
+        if (nextStageBtn) {
+            nextStageBtn.addEventListener('click', () => this.nextStage());
+        }
+
+        const retryStageBtn = document.getElementById('retryStageBtn');
+        if (retryStageBtn) {
+            retryStageBtn.addEventListener('click', () => {
+                document.getElementById('stageClearOverlay').style.display = 'none';
+                this.startGame();
+            });
+        }
+
+        // Shop Buttons
+        ['shopBtnFloat', 'startShopBtn', 'clearShopBtn', 'pauseShopBtn', 'gameOverShopBtn'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.idolShop) window.idolShop.open();
+            });
+        });
+
+        const closeShopBtn = document.getElementById('closeShopBtn');
+        if (closeShopBtn) {
+            closeShopBtn.addEventListener('click', () => {
+                if (window.idolShop) window.idolShop.close();
+            });
+        }
+
         const muteBtn = document.getElementById('muteBtn');
         if (muteBtn) {
             muteBtn.addEventListener('click', () => {
                 const muted = window.soundManager.toggleMute();
-                muteBtn.textContent = muted ? '🔇 Muted' : '🔊 Sound On';
+                muteBtn.textContent = muted ? '🔇' : '🔊';
             });
         }
     }
 
     startGame() {
         this.state = 'PLAYING';
+        this.currentStage = (window.TOUR_STAGES && window.TOUR_STAGES[this.currentStageIndex]) 
+            ? window.TOUR_STAGES[this.currentStageIndex] 
+            : { id: 'tokyo', name: '東京 · 渋谷 STAGE', goalAltitude: 500, clearReward: 300 };
+
+        this.stageCleared = false;
+        this.finalPlatformSpawned = false;
+
         this.score = 0;
         this.lives = this.maxLives;
         this.combo = 0;
@@ -237,11 +287,21 @@ class StarIdolGame {
 
         this.player.reset(this.width / 2, this.height - 100);
 
+        // Sync equipped items from shop
+        if (window.idolShop) {
+            this.player.equippedProp = window.idolShop.equipped.prop || 'mic';
+            this.player.equippedHead = window.idolShop.equipped.head || 'ribbon';
+            this.player.hasWings = (this.player.equippedHead === 'wings');
+            window.idolShop.updateUI();
+        }
+
         document.getElementById('startOverlay').style.display = 'none';
         document.getElementById('gameOverOverlay').style.display = 'none';
+        document.getElementById('stageClearOverlay').style.display = 'none';
         document.getElementById('pauseOverlay').style.display = 'none';
 
         window.soundManager.startBGM();
+        this.updateHUD();
     }
 
     togglePause() {
@@ -255,8 +315,6 @@ class StarIdolGame {
     }
 
     generatePlatform(y) {
-        const types = ['normal', 'normal', 'moving', 'spring', 'fragile'];
-        // At higher altitudes, more moving and fragile platforms
         const rand = Math.random();
         let type = 'normal';
         if (rand < 0.45) type = 'normal';
@@ -347,13 +405,19 @@ class StarIdolGame {
 
                 if (
                     footY >= plat.y &&
-                    prevFootY <= plat.y + 12 &&
-                    this.player.x + 12 >= plat.x &&
-                    this.player.x - 12 <= plat.x + plat.width
+                    prevFootY <= plat.y + 14 &&
+                    this.player.x + 14 >= plat.x &&
+                    this.player.x - 14 <= plat.x + plat.width
                 ) {
                     this.player.y = plat.y - 25;
                     this.player.vy = 0;
                     this.player.land();
+
+                    // Grand Stage Clear trigger!
+                    if (plat.type === 'grand_stage') {
+                        this.stageClear();
+                        break;
+                    }
 
                     // Platform specific actions
                     if (plat.type === 'spring') {
@@ -395,8 +459,8 @@ class StarIdolGame {
                 p.springActive -= dt;
             }
 
-            // Remove platforms too far below camera
-            if (p.y > this.cameraY + this.height + 80) {
+            // Remove platforms too far below camera (except grand finale stage)
+            if (p.y > this.cameraY + this.height + 80 && p.type !== 'grand_stage') {
                 this.platforms.splice(i, 1);
             }
         }
@@ -411,14 +475,32 @@ class StarIdolGame {
         this.altitude = Math.max(0, Math.floor((this.height - 120 - this.player.y) / 10));
         if (this.altitude > this.maxAltitude) {
             this.maxAltitude = this.altitude;
-            this.score += 2; // Extra score for ascending
+            this.score += 2;
         }
 
-        // Spawn new platforms above camera
+        // Goal Platform Spawn Check
+        const goalMeters = this.currentStage.goalAltitude || 500;
+        const targetGoalY = this.height - 120 - (goalMeters * 10);
         const highestPlatformY = this.platforms.reduce((min, p) => Math.min(min, p.y), this.cameraY + this.height);
-        if (highestPlatformY > this.cameraY - 140) {
+
+        if (highestPlatformY > this.cameraY - 140 && !this.finalPlatformSpawned) {
             const nextY = highestPlatformY - (60 + Math.random() * 30);
-            this.generatePlatform(nextY);
+            if (nextY <= targetGoalY) {
+                // Spawn the Grand Finale Center Stage Platform!
+                this.platforms.push({
+                    x: (this.width - 320) / 2,
+                    y: targetGoalY,
+                    width: 320,
+                    height: 32,
+                    type: 'grand_stage',
+                    color: '#ffd700',
+                    cityName: this.currentStage.name
+                });
+                this.finalPlatformSpawned = true;
+                this.addFloatingText(this.width / 2, targetGoalY - 45, `★ ${this.currentStage.name} 终点舞台已到达！ ★`, '#ffd700');
+            } else {
+                this.generatePlatform(nextY);
+            }
         }
 
         // Update Collectibles
@@ -522,10 +604,15 @@ class StarIdolGame {
 
     collectItem(item) {
         this.combo++;
-        this.comboTimer = 3.2; // Seconds to chain combo
+        this.comboTimer = 3.2;
 
         const multiplier = Math.min(10, 1 + Math.floor(this.combo / 4));
         const feverMult = this.player.feverTimer > 0 ? 2 : 1;
+
+        // Earn star coins for shop!
+        if (window.idolShop) {
+            window.idolShop.addCoins(item.type === 'fever' ? 8 : (item.type === 'note' ? 4 : 2));
+        }
 
         if (item.type === 'star') {
             const pts = 100 * multiplier * feverMult;
@@ -544,7 +631,7 @@ class StarIdolGame {
         } else if (item.type === 'fever') {
             const pts = 500 * multiplier;
             this.score += pts;
-            this.player.feverTimer = 9.0; // 9 seconds of idol fever!
+            this.player.feverTimer = 9.0;
             this.cheerMeter = 100;
             this.screenShake = 6;
             this.createSparkleBurst(item.x, item.y, '#ff4081', 25);
@@ -578,7 +665,7 @@ class StarIdolGame {
             this.triggerCheerSurge();
         }
 
-        // Combo hype notification (Japanese idol fan calls)
+        // Combo hype notification
         if (this.combo > 1 && this.combo % 5 === 0) {
             const phrases = [
                 'もっと！ MOTTO!',
@@ -611,6 +698,63 @@ class StarIdolGame {
                 collected: false
             });
         }
+    }
+
+    // Stage Clear / City Concert Finale
+    stageClear() {
+        if (this.stageCleared) return;
+        this.stageCleared = true;
+        this.state = 'CLEAR';
+        window.soundManager.stopBGM();
+        window.soundManager.playVictoryFanfare();
+
+        // Screen celebration shake & confetti
+        this.screenShake = 8;
+        for (let i = 0; i < 40; i++) {
+            this.createSparkleBurst(this.player.x + (Math.random() - 0.5) * 140, this.player.y - 20, '#ffd700', 8);
+        }
+
+        // Reward star coins
+        const reward = this.currentStage.clearReward || 300;
+        if (window.idolShop) {
+            window.idolShop.addCoins(reward);
+        }
+
+        // Show Stage Clear Overlay
+        const cityTitle = document.getElementById('clearCityTitle');
+        const clearReward = document.getElementById('clearCityReward');
+        const clearScore = document.getElementById('clearScore');
+        if (cityTitle) cityTitle.textContent = `★ ${this.currentStage.name} 完奏！★`;
+        if (clearReward) clearReward.textContent = `+${reward} ⭐ 巡演报酬到手！`;
+        if (clearScore) clearScore.textContent = this.score;
+
+        // Draw 16-bit Pixel Art Cheki Portrait
+        const chekiCanvas = document.getElementById('pixelChekiCanvas');
+        if (chekiCanvas && window.PixelArtCheki) {
+            window.PixelArtCheki.drawToCanvas(chekiCanvas, this.currentStage, this.player.equippedProp);
+        }
+
+        // Update Next Stage Button
+        const nextBtn = document.getElementById('nextStageBtn');
+        if (nextBtn) {
+            if (this.currentStage.isFinal) {
+                nextBtn.textContent = '🏆 银河巡演大圆满！重新开启世界巡演';
+            } else {
+                const nextIndex = (this.currentStageIndex + 1) % window.TOUR_STAGES.length;
+                const nextStage = window.TOUR_STAGES[nextIndex];
+                nextBtn.textContent = `🚀 前往下一站: ${nextStage.name}`;
+            }
+        }
+
+        document.getElementById('stageClearOverlay').style.display = 'flex';
+    }
+
+    nextStage() {
+        this.currentStageIndex = (this.currentStageIndex + 1) % window.TOUR_STAGES.length;
+        localStorage.setItem('star_idol_stage_index', this.currentStageIndex);
+        this.currentStage = window.TOUR_STAGES[this.currentStageIndex];
+        document.getElementById('stageClearOverlay').style.display = 'none';
+        this.startGame();
     }
 
     handlePlayerFall() {
@@ -649,6 +793,13 @@ class StarIdolGame {
         document.getElementById('finalRank').textContent = rank;
         const stamp = document.getElementById('chekiStamp');
         if (stamp) stamp.textContent = shortRank;
+
+        // Render 16-bit Pixel Art Cheki Portrait for Game Over
+        const chekiCanvas = document.getElementById('pixelChekiGameOverCanvas');
+        if (chekiCanvas && window.PixelArtCheki) {
+            window.PixelArtCheki.drawToCanvas(chekiCanvas, this.currentStage, this.player.equippedProp);
+        }
+
         document.getElementById('gameOverOverlay').style.display = 'flex';
     }
 
@@ -685,9 +836,16 @@ class StarIdolGame {
         const livesElem = document.getElementById('hudLives');
         const comboElem = document.getElementById('hudCombo');
         const cheerBar = document.getElementById('cheerFill');
+        const stageElem = document.getElementById('hudStageName');
 
         if (scoreElem) scoreElem.textContent = this.score;
-        if (altElem) altElem.textContent = `${this.altitude}m`;
+        if (altElem && this.currentStage) {
+            const goal = this.currentStage.goalAltitude || 500;
+            altElem.textContent = `${this.altitude}m / ${goal}m`;
+        }
+        if (stageElem && this.currentStage) {
+            stageElem.textContent = `${this.currentStage.icon} ${this.currentStage.name}`;
+        }
         if (livesElem) livesElem.textContent = '❤'.repeat(Math.max(0, this.lives));
         if (comboElem) {
             comboElem.textContent = this.combo > 1 ? `x${this.combo} COMBO!` : '';
@@ -712,6 +870,10 @@ class StarIdolGame {
                 avatarMood.style.color = '#ff80ab';
             }
         }
+
+        if (window.idolShop) {
+            window.idolShop.updateUI();
+        }
     }
 
     render() {
@@ -726,7 +888,7 @@ class StarIdolGame {
             ctx.translate(sx, sy);
         }
 
-        // 1. Dynamic Parallax Background
+        // 1. Dynamic Parallax Background with City Landmarks
         this.renderBackground(ctx);
 
         // Apply Camera Transform
@@ -757,29 +919,22 @@ class StarIdolGame {
     }
 
     renderBackground(ctx) {
-        // Gradient based on altitude
-        const alt = this.altitude;
+        const stage = this.currentStage || {
+            bgColorTop: '#120529', bgColorMid: '#2e0e4e', bgColorBottom: '#5c1775'
+        };
+
+        // Background Gradient
         let grad = ctx.createLinearGradient(0, 0, 0, this.height);
-
-        if (alt < 100) {
-            // Stage 1: Neon Concert Night
-            grad.addColorStop(0, '#10062b');
-            grad.addColorStop(0.6, '#260c4a');
-            grad.addColorStop(1, '#48135e');
-        } else if (alt < 250) {
-            // Stage 2: Twilight Sky
-            grad.addColorStop(0, '#190a36');
-            grad.addColorStop(0.5, '#451b54');
-            grad.addColorStop(1, '#ff6e7f');
-        } else {
-            // Stage 3: Cosmic Starlight Galaxy
-            grad.addColorStop(0, '#050212');
-            grad.addColorStop(0.5, '#120738');
-            grad.addColorStop(1, '#1b0d4f');
-        }
-
+        grad.addColorStop(0, stage.bgColorTop);
+        grad.addColorStop(0.5, stage.bgColorMid);
+        grad.addColorStop(1, stage.bgColorBottom);
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, this.width, this.height);
+
+        // City Landmark Silhouettes (Tokyo Tower, Dotonbori, Eiffel Tower, Broadway, Galaxy)
+        if (window.StageRenderer) {
+            window.StageRenderer.renderLandmarks(ctx, stage, this.cameraY, this.width, this.height);
+        }
 
         // Background stars
         ctx.save();
@@ -804,7 +959,33 @@ class StarIdolGame {
 
             ctx.save();
 
-            if (plat.type === 'stage') {
+            if (plat.type === 'grand_stage') {
+                // Grand Tour Final Stage Platform
+                ctx.fillStyle = '#b71c1c'; // Red carpet
+                ctx.roundRect(plat.x, plat.y, plat.width, plat.height, 8);
+                ctx.fill();
+
+                // Golden rim
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 3;
+                ctx.shadowColor = '#ffff00';
+                ctx.shadowBlur = 12;
+                ctx.stroke();
+
+                // Rainbow LED strip
+                const rainbow = `hsl(${(Date.now() / 5) % 360}, 100%, 65%)`;
+                ctx.fillStyle = rainbow;
+                ctx.fillRect(plat.x + 8, plat.y + 3, plat.width - 16, 4);
+
+                // Stage label
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = '#000000';
+                ctx.shadowBlur = 4;
+                ctx.font = 'bold 12px "Fredoka One", "M PLUS Rounded 1c", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`★ ${plat.cityName} 终点舞台 ★`, plat.x + plat.width / 2, plat.y + 22);
+                ctx.shadowBlur = 0;
+            } else if (plat.type === 'stage') {
                 // Concert main stage base
                 ctx.fillStyle = '#4a148c';
                 ctx.fillRect(plat.x, plat.y, plat.width, plat.height);

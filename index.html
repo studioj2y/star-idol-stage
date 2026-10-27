@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Star Idol Stage! 星のアイドルステージ</title>
+    <title>Star Idol Stage! 星のアイドルステージ - なぁたん巡演</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,6 +14,17 @@
 
         <!-- HUD Layer -->
         <div id="hud">
+            <!-- Stage Tour & Coins Row -->
+            <div class="hud-row hud-top-bar">
+                <div class="hud-box stage-badge" id="hudStageBadge">
+                    <span id="hudStageName">🗼 東京 · 渋谷 STAGE</span>
+                </div>
+                <div class="hud-box coins-box">
+                    <span class="star-coins-display">⭐ 100</span>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
             <div class="hud-row">
                 <div class="hud-box avatar-box">
                     <span id="avatarMood">🎀 なぁたん</span>
@@ -24,7 +35,7 @@
                 </div>
                 <div class="hud-box">
                     <span class="hud-title">ALT</span>
-                    <span id="hudAltitude" class="hud-val">0m</span>
+                    <span id="hudAltitude" class="hud-val">0m / 500m</span>
                 </div>
                 <div class="hud-box">
                     <span class="hud-title">LIVES</span>
@@ -32,6 +43,7 @@
                 </div>
             </div>
 
+            <!-- Cheer Bar & Combo Row -->
             <div class="hud-row">
                 <div class="cheer-container">
                     <span class="cheer-label">AUDIENCE HYPE</span>
@@ -57,46 +69,93 @@
             </div>
         </div>
 
-        <!-- Sound Button -->
-        <button id="muteBtn">🔊 Sound On</button>
+        <!-- Floating Action Buttons -->
+        <div class="floating-actions">
+            <button id="shopBtnFloat" class="action-round-btn" title="偶像衣橱">🛍️</button>
+            <button id="muteBtn" class="action-round-btn" title="静音开关">🔊</button>
+        </div>
 
         <!-- Start Overlay -->
         <div id="startOverlay" class="overlay">
             <h1 class="game-title">★ STAR IDOL STAGE! ★</h1>
-            <p class="subtitle">星のアイドルステージ</p>
+            <p class="subtitle">なぁたん 世界巡演 · LIVE TOUR</p>
 
             <div class="character-card">
-                <h3 class="char-title">Meet Hikari (Live Stage Edition)!</h3>
+                <h3 class="char-title">Meet なぁたん (Live Stage Edition)!</h3>
                 <p class="char-desc">
-                    Inspired by the live concert idol: high ponytail with red gingham bow, voluminous puffy ruffled sleeves, handheld stage mic, and pointing jumps! Unleash <strong>IDOL FEVER</strong>!
+                    身着红白格子打歌服，从<strong>东京、大阪</strong>起跑，穿梭<strong>巴黎、纽约</strong>，最终登上<strong>银河终点大舞台</strong>！收集星星兑换电吉他与魔法棒，引爆「もっと！」「なぁたん！」应援海！
                 </p>
             </div>
 
             <div class="controls-hint">
-                <p><span class="key-badge">A</span> / <span class="key-badge">D</span> or <span class="key-badge">◀</span> / <span class="key-badge">▶</span> : Move</p>
-                <p><span class="key-badge">W</span> / <span class="key-badge">Space</span> / <span class="key-badge">▲</span> : Jump (Press again for Double Jump!)</p>
-                <p><span class="key-badge">P</span> : Pause &bull; <span class="key-badge">M</span> : Mute Audio</p>
+                <p><span class="key-badge">A</span> / <span class="key-badge">D</span> 或 <span class="key-badge">◀</span> / <span class="key-badge">▶</span> : 左右移动</p>
+                <p><span class="key-badge">Space</span> / <span class="key-badge">W</span> / <span class="key-badge">▲</span> : 起跳 (空中再按触发二段翻转跳)</p>
+                <p><span class="key-badge">P</span> : 暂停 &bull; <span class="key-badge">M</span> : 音效开关</p>
             </div>
 
-            <button class="retro-btn" id="startBtn">START CONCERT!</button>
+            <div class="start-btn-group">
+                <button class="retro-btn" id="startBtn">START TOUR! (开演)</button>
+                <button class="retro-btn secondary-btn" id="startShopBtn">🛍️ 偶像衣橱商店</button>
+            </div>
         </div>
 
         <!-- Pause Overlay -->
         <div id="pauseOverlay" class="overlay" style="display: none;">
             <h2 class="game-title">STAGE PAUSED</h2>
-            <p class="subtitle">Catch your breath, Idol!</p>
-            <p style="color: #b0bec5; margin-bottom: 20px;">Press <span class="key-badge">P</span> or <span class="key-badge">ESC</span> to Resume</p>
+            <p class="subtitle">中场休息，喝口水吧！</p>
+            <p style="color: #b0bec5; margin-bottom: 20px;">按 <span class="key-badge">P</span> 或 <span class="key-badge">ESC</span> 继续公演</p>
+            <button class="retro-btn secondary-btn" id="pauseShopBtn">🛍️ 打开衣橱更换配饰</button>
         </div>
 
-        <!-- Game Over Overlay (Cheki / Polaroid Photo Summary) -->
+        <!-- Stage Clear Overlay (Victory Cheki Polaroid) -->
+        <div id="stageClearOverlay" class="overlay" style="display: none;">
+            <div class="cheki-card victory-card">
+                <div class="cheki-tape gold-tape"></div>
+                <h2 class="cheki-title gold-title">CONCERT CLEAR!</h2>
+                <p class="cheki-sub" id="clearCityTitle">★ 東京公演 完奏！ ★</p>
+
+                <!-- 16-bit Pixel Art Cheki Portrait Canvas -->
+                <div class="cheki-photo">
+                    <canvas id="pixelChekiCanvas" width="180" height="180"></canvas>
+                    <div class="cheki-stamp gold-stamp">TOUR CLEAR 🏆</div>
+                </div>
+
+                <div class="gameover-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">巡演演出报酬:</span>
+                        <span id="clearCityReward" class="stat-val highlight-val">+300 ⭐</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">累积分数:</span>
+                        <span id="clearScore" class="stat-val">0</span>
+                    </div>
+                </div>
+
+                <div class="cheki-sign">
+                    <span class="sign-handwritten">なぁたん ♡</span>
+                    <small>みんなの応援のおかげだよ！ (Next City!)</small>
+                </div>
+
+                <div class="clear-btn-group">
+                    <button class="retro-btn" id="nextStageBtn">🚀 前往下一站巡演</button>
+                    <div class="button-row">
+                        <button class="retro-btn secondary-btn" id="clearShopBtn">🛍️ 购买配饰</button>
+                        <button class="retro-btn secondary-btn" id="retryStageBtn">🔄 再次巡演</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Overlay (Encore Cheki) -->
         <div id="gameOverOverlay" class="overlay" style="display: none;">
             <div class="cheki-card">
                 <div class="cheki-tape"></div>
                 <h2 class="cheki-title">ENCORE FINISHED!</h2>
                 <p class="cheki-sub">★ LIVE CONCERT STAGE ★</p>
 
+                <!-- 16-bit Pixel Art Cheki Portrait Canvas for Game Over -->
                 <div class="cheki-photo">
-                    <div class="cheki-avatar-icon">🎤✨</div>
+                    <canvas id="pixelChekiGameOverCanvas" width="180" height="180"></canvas>
                     <div class="cheki-stamp" id="chekiStamp">RANK S</div>
                 </div>
 
@@ -120,12 +179,31 @@
                     <small>応援ありがとう！ (Thank you!)</small>
                 </div>
 
-                <button class="retro-btn" id="restartBtn">ONE MORE ENCORE! (RETRY)</button>
+                <div class="button-row">
+                    <button class="retro-btn" id="restartBtn">ONE MORE ENCORE! (重试)</button>
+                    <button class="retro-btn secondary-btn" id="gameOverShopBtn">🛍️ 衣橱</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wardrobe & Accessory Shop Modal -->
+        <div id="shopModal" class="overlay" style="display: none;">
+            <div class="shop-container">
+                <div class="shop-header">
+                    <h2>🛍️ なぁたんの偶像衣橱</h2>
+                    <div class="star-coins-display coins-badge">⭐ 100</div>
+                    <button class="shop-close-btn" id="closeShopBtn">✖</button>
+                </div>
+                <p class="shop-hint">通关城市巡演收集星币，购买超绝帅气电吉他、星光魔法棒与萌萌猫耳！</p>
+                <div id="shopItemList" class="shop-list"></div>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
+    <script src="stages.js"></script>
+    <script src="cheki_art.js"></script>
+    <script src="shop.js"></script>
     <script src="audio.js"></script>
     <script src="player.js"></script>
     <script src="game.js"></script>

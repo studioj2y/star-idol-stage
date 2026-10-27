@@ -45,6 +45,14 @@ class IdolPlayer {
         // Gingham Pattern Canvas Cache
         this.ginghamPattern = null;
         this.patternCanvas = null;
+
+        // Equipped Accessories (from shop)
+        const savedEquip = JSON.parse(localStorage.getItem('star_idol_equipped') || '{"prop": "mic", "head": "ribbon"}');
+        this.equippedProp = savedEquip.prop || 'mic';
+        this.equippedHead = savedEquip.head || 'ribbon';
+        if (this.equippedHead === 'wings') {
+            this.hasWings = true;
+        }
     }
 
     initPattern(ctx) {
@@ -457,6 +465,30 @@ class IdolPlayer {
         ctx.ellipse(0, -10, 8, 2.2, 0, 0, Math.PI * 2);
         ctx.fill();
 
+        // Head Accessories: Cat Ears or Crown (if equipped)
+        if (this.equippedHead === 'neko') {
+            ctx.fillStyle = '#ff80ab';
+            ctx.beginPath();
+            ctx.moveTo(-11, -12); ctx.lineTo(-17, -22); ctx.lineTo(-6, -16); ctx.closePath(); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(11, -12); ctx.lineTo(17, -22); ctx.lineTo(6, -16); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(-10, -13); ctx.lineTo(-15, -20); ctx.lineTo(-7, -16); ctx.closePath(); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(10, -13); ctx.lineTo(15, -20); ctx.lineTo(7, -16); ctx.closePath(); ctx.fill();
+        } else if (this.equippedHead === 'crown') {
+            ctx.fillStyle = '#ffd700';
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.moveTo(-7, -16); ctx.lineTo(-9, -23); ctx.lineTo(-4, -18);
+            ctx.lineTo(0, -26); ctx.lineTo(4, -18); ctx.lineTo(9, -23); ctx.lineTo(7, -16);
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
         ctx.restore();
     }
 
@@ -688,40 +720,74 @@ class IdolPlayer {
         ctx.restore();
     }
 
-    // Handheld Stage Wireless Microphone (Black handle, metallic silver grille)
+    // Handheld Stage Prop (Mic, Guitar, Wand, or Glowstick)
     drawHandheldMic(ctx, breath) {
         ctx.save();
         ctx.translate(8, -1 + breath);
         ctx.rotate(0.35 + Math.sin(this.animTimer) * 0.05);
 
-        // Forearm holding mic toward mouth
+        // Forearm holding item toward mouth/body
         ctx.fillStyle = '#fff2ec';
         ctx.fillRect(-1.5, -4, 3, 8);
 
-        // Hand fingers wrapping mic
+        // Hand fingers wrapping item
         ctx.beginPath();
         ctx.arc(0, -4, 2.6, 0, Math.PI * 2);
         ctx.fill();
 
-        // Stage Mic Body (Sleek Matte Black)
-        ctx.fillStyle = '#212121';
-        ctx.fillRect(-1.8, -12, 3.6, 14);
-
-        // Metallic Grille Capsule (Silver/Charcoal Mesh)
-        ctx.fillStyle = '#9e9e9e';
-        ctx.strokeStyle = '#424242';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.ellipse(0, -14, 2.8, 3.8, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        // Soundwave sparkle emitted from mic while singing
-        if (Math.random() < 0.3) {
-            ctx.fillStyle = '#ff80ab';
+        if (this.equippedProp === 'guitar') {
+            // Electric Rock Guitar
+            ctx.fillStyle = '#d50000';
+            ctx.strokeStyle = '#212121';
+            ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.arc(0, -18, 1.5, 0, Math.PI * 2);
+            ctx.roundRect(-10, -8, 16, 22, 4);
             ctx.fill();
+            ctx.stroke();
+            // Guitar neck
+            ctx.fillStyle = '#8d6e63';
+            ctx.fillRect(-6, -26, 4, 18);
+            // Headstock
+            ctx.fillStyle = '#d50000';
+            ctx.fillRect(-7, -30, 6, 5);
+        } else if (this.equippedProp === 'wand') {
+            // Magical Star Wand
+            ctx.fillStyle = '#ff4081';
+            ctx.fillRect(-1.5, -12, 3, 16);
+            ctx.fillStyle = '#ffd54f';
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 8;
+            this.drawMiniStar(ctx, 0, -14, 5.5);
+            ctx.shadowBlur = 0;
+        } else if (this.equippedProp === 'glowstick') {
+            // Ultra Rainbow Penlight
+            const rainbow = `hsl(${(Date.now() / 4) % 360}, 100%, 65%)`;
+            ctx.fillStyle = rainbow;
+            ctx.shadowColor = rainbow;
+            ctx.shadowBlur = 10;
+            ctx.fillRect(-2, -18, 4, 20);
+            ctx.shadowBlur = 0;
+        } else {
+            // Stage Mic Body (Sleek Matte Black)
+            ctx.fillStyle = '#212121';
+            ctx.fillRect(-1.8, -12, 3.6, 14);
+
+            // Metallic Grille Capsule (Silver/Charcoal Mesh)
+            ctx.fillStyle = '#9e9e9e';
+            ctx.strokeStyle = '#424242';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(0, -14, 2.8, 3.8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Soundwave sparkle emitted from mic while singing
+            if (Math.random() < 0.3) {
+                ctx.fillStyle = '#ff80ab';
+                ctx.beginPath();
+                ctx.arc(0, -18, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
 
         ctx.restore();
