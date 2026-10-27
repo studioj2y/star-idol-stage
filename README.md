@@ -9,7 +9,7 @@
 
 本项目采用纯前端 HTML5 / Canvas / Web Audio API 构建，无需任何后端环境或复杂构建依赖，可直接通过 **GitHub Pages** 一键部署并在线游玩：
 
-🔗 **在线游玩地址**：`https://<你的GitHub用户名>.github.io/<仓库名>/`
+🔗 **在线游玩地址**：https://studioj2y.github.io/star-idol-stage/
 
 ---
 
