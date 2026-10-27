@@ -1,6 +1,14 @@
-# 忽略系统与编辑器缓存文件
+# 系统与缓存
 .DS_Store
 Thumbs.db
 *.log
 .vscode/
 .idea/
+__pycache__/
+
+# 忽略非本游戏的无关工具与可执行文件 (Keep repo pure & lightweight)
+*.exe
+*.ico
+*.bat
+converter_core.py
+kfx_gui.py
