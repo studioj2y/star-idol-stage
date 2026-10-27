@@ -512,7 +512,7 @@ class StarIdolGame {
                     cityName: this.currentStage.name
                 });
                 this.finalPlatformSpawned = true;
-                this.addFloatingText(this.width / 2, targetGoalY - 45, '★ ' + this.currentStage.name + ' 终点舞台已到达！ ★', '#ffd700');
+                this.addFloatingText(this.width / 2, targetGoalY - 45, '★ ' + this.currentStage.name + ' GOAL STAGE REACHED! ★', '#ffd700');
                 break;
             } else {
                 this.generatePlatform(nextY);
@@ -767,8 +767,8 @@ class StarIdolGame {
         const cityTitle = document.getElementById('clearCityTitle');
         const clearReward = document.getElementById('clearCityReward');
         const clearScore = document.getElementById('clearScore');
-        if (cityTitle) cityTitle.textContent = `★ ${this.currentStage.name} 完奏！★`;
-        if (clearReward) clearReward.textContent = `+${reward} ⭐ 巡演报酬到手！`;
+        if (cityTitle) cityTitle.textContent = `★ ${this.currentStage.name} CLEAR! ★`;
+        if (clearReward) clearReward.textContent = `+${reward} ⭐ TOUR BONUS GET!`;
         if (clearScore) clearScore.textContent = this.score;
 
         // Update Polaroid City Handwritten Notes & Stamp
@@ -789,11 +789,11 @@ class StarIdolGame {
         const nextBtn = document.getElementById('nextStageBtn');
         if (nextBtn) {
             if (this.currentStage.isFinal) {
-                nextBtn.textContent = '🏆 银河巡演大圆满！重新开启世界巡演';
+                nextBtn.textContent = '🏆 GALAXY TOUR COMPLETE! (ワールドツアーをもう一度)';
             } else {
                 const nextIndex = (this.currentStageIndex + 1) % window.TOUR_STAGES.length;
                 const nextStage = window.TOUR_STAGES[nextIndex];
-                nextBtn.textContent = `🚀 前往下一站: ${nextStage.name}`;
+                nextBtn.textContent = `🚀 NEXT CITY: ${nextStage.name}`;
             }
         }
 
@@ -1058,7 +1058,7 @@ class StarIdolGame {
                 ctx.shadowBlur = 4;
                 ctx.font = 'bold 12px "Fredoka One", "M PLUS Rounded 1c", sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(`★ ${plat.cityName} 终点舞台 ★`, plat.x + plat.width / 2, plat.y + 22);
+                ctx.fillText(`★ ${plat.cityName} GOAL STAGE ★`, plat.x + plat.width / 2, plat.y + 22);
                 ctx.shadowBlur = 0;
             } else if (plat.type === 'stage') {
                 // Concert main stage base
@@ -1376,7 +1376,16 @@ class StarIdolGame {
     }
 }
 
-// Instantiate game on window load
-window.addEventListener('load', () => {
-    window.game = new StarIdolGame();
-});
+// Instantiate game on window load or DOM ready
+function initStarIdolGame() {
+    if (!window.game) {
+        window.game = new StarIdolGame();
+    }
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initStarIdolGame();
+} else {
+    window.addEventListener('DOMContentLoaded', initStarIdolGame);
+    window.addEventListener('load', initStarIdolGame);
+}

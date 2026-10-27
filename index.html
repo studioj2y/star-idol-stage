@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Star Idol Stage! 星のアイドルステージ - なぁたん巡演</title>
+    <title>Star Idol Stage! 星のアイドルステージ - なぁたん WORLD TOUR</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -71,40 +71,40 @@
 
         <!-- Floating Action Buttons -->
         <div class="floating-actions">
-            <button id="shopBtnFloat" class="action-round-btn" title="偶像衣橱">🛍️</button>
-            <button id="muteBtn" class="action-round-btn" title="静音开关">🔊</button>
+            <button id="shopBtnFloat" class="action-round-btn" title="IDOL CLOSET (衣装ショップ)">🛍️</button>
+            <button id="muteBtn" class="action-round-btn" title="SOUND ON / MUTE (音量)">🔊</button>
         </div>
 
         <!-- Start Overlay -->
         <div id="startOverlay" class="overlay">
             <h1 class="game-title">★ STAR IDOL STAGE! ★</h1>
-            <p class="subtitle">なぁたん 世界巡演 · LIVE TOUR</p>
+            <p class="subtitle">なぁたん ワールドツアー · WORLD TOUR LIVE</p>
 
             <div class="character-card">
                 <h3 class="char-title">Meet なぁたん (Live Stage Edition)!</h3>
                 <p class="char-desc">
-                    身着红白格子打歌服，从<strong>东京、大阪</strong>起跑，穿梭<strong>巴黎、纽约</strong>，最终登上<strong>银河终点大舞台</strong>！收集星星兑换电吉他与魔法棒，引爆「もっと！」「なぁたん！」应援海！
+                    赤チェックのステージ衣装で<strong>東京・大阪</strong>からスタート、<strong>パリ・ニューヨーク</strong>を巡り、目指すは<strong>銀河大舞台</strong>！スターを集めてエレキギターやステッキを手に入れ、「もっと！」「なぁたん！」コールを巻き起こそう！
                 </p>
             </div>
 
             <div class="controls-hint">
-                <p><span class="key-badge">A</span> / <span class="key-badge">D</span> 或 <span class="key-badge">◀</span> / <span class="key-badge">▶</span> : 左右移动</p>
-                <p><span class="key-badge">Space</span> / <span class="key-badge">W</span> / <span class="key-badge">▲</span> : 起跳 (空中再按触发二段翻转跳)</p>
-                <p><span class="key-badge">P</span> : 暂停 &bull; <span class="key-badge">M</span> : 音效开关</p>
+                <p><span class="key-badge">A</span> / <span class="key-badge">D</span> or <span class="key-badge">◀</span> / <span class="key-badge">▶</span> : MOVE LEFT / RIGHT (左右移動)</p>
+                <p><span class="key-badge">Space</span> / <span class="key-badge">W</span> / <span class="key-badge">▲</span> : JUMP (2-STEP TWIRL JUMP! ジャンプ)</p>
+                <p><span class="key-badge">P</span> : PAUSE (一時停止) &bull; <span class="key-badge">M</span> : BGM / SOUND (音量)</p>
             </div>
 
             <div class="start-btn-group">
-                <button class="retro-btn" id="startBtn">START TOUR! (开演)</button>
-                <button class="retro-btn secondary-btn" id="startShopBtn">🛍️ 偶像衣橱商店</button>
+                <button class="retro-btn" id="startBtn">START LIVE TOUR! (開演)</button>
+                <button class="retro-btn secondary-btn" id="startShopBtn">🛍️ IDOL CLOSET (衣装ショップ)</button>
             </div>
         </div>
 
         <!-- Pause Overlay -->
         <div id="pauseOverlay" class="overlay" style="display: none;">
             <h2 class="game-title">STAGE PAUSED</h2>
-            <p class="subtitle">中场休息，喝口水吧！</p>
-            <p style="color: #b0bec5; margin-bottom: 20px;">按 <span class="key-badge">P</span> 或 <span class="key-badge">ESC</span> 继续公演</p>
-            <button class="retro-btn secondary-btn" id="pauseShopBtn">🛍️ 打开衣橱更换配饰</button>
+            <p class="subtitle">MC TIME • 少し休憩しましょう！</p>
+            <p style="color: #b0bec5; margin-bottom: 20px;">PRESS <span class="key-badge">P</span> OR <span class="key-badge">ESC</span> TO RESUME (再開)</p>
+            <button class="retro-btn secondary-btn" id="pauseShopBtn">🛍️ CHANGE OUTFIT (クローゼット)</button>
         </div>
 
         <!-- Stage Clear Overlay (Victory Cheki Polaroid) -->
@@ -122,11 +122,11 @@
 
                 <div class="gameover-stats">
                     <div class="stat-item">
-                        <span class="stat-label">巡演演出报酬:</span>
+                        <span class="stat-label">TOUR BONUS (ライブ報酬):</span>
                         <span id="clearCityReward" class="stat-val highlight-val">+300 ⭐</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">累积分数:</span>
+                        <span class="stat-label">TOTAL SCORE (累計スコア):</span>
                         <span id="clearScore" class="stat-val">0</span>
                     </div>
                 </div>
@@ -137,10 +137,10 @@
                 </div>
 
                 <div class="clear-btn-group">
-                    <button class="retro-btn" id="nextStageBtn">🚀 前往下一站巡演</button>
+                    <button class="retro-btn" id="nextStageBtn">🚀 NEXT CITY TOUR! (次の都市へ)</button>
                     <div class="button-row">
-                        <button class="retro-btn secondary-btn" id="clearShopBtn">🛍️ 购买配饰</button>
-                        <button class="retro-btn secondary-btn" id="retryStageBtn">🔄 再次巡演</button>
+                        <button class="retro-btn secondary-btn" id="clearShopBtn">🛍️ SHOP (衣装ショップ)</button>
+                        <button class="retro-btn secondary-btn" id="retryStageBtn">🔄 RETRY STAGE (再挑戦)</button>
                     </div>
                 </div>
             </div>
@@ -180,8 +180,8 @@
                 </div>
 
                 <div class="button-row">
-                    <button class="retro-btn" id="restartBtn">ONE MORE ENCORE! (重试)</button>
-                    <button class="retro-btn secondary-btn" id="gameOverShopBtn">🛍️ 衣橱</button>
+                    <button class="retro-btn" id="restartBtn">ONE MORE ENCORE! (もう一回！)</button>
+                    <button class="retro-btn secondary-btn" id="gameOverShopBtn">🛍️ CLOSET (クローゼット)</button>
                 </div>
             </div>
         </div>
@@ -190,11 +190,11 @@
         <div id="shopModal" class="overlay" style="display: none;">
             <div class="shop-container">
                 <div class="shop-header">
-                    <h2>🛍️ なぁたんの偶像衣橱</h2>
+                    <h2>🛍️ NAATAN'S IDOL CLOSET (クローゼット)</h2>
                     <div class="star-coins-display coins-badge">⭐ 100</div>
                     <button class="shop-close-btn" id="closeShopBtn">✖</button>
                 </div>
-                <p class="shop-hint">通关城市巡演收集星币，购买超绝帅气电吉他、星光魔法棒与萌萌猫耳！</p>
+                <p class="shop-hint">ライブをクリアしてスターコインを集め、エレキギターやステッキ、猫耳をGETしよう！</p>
                 <div id="shopItemList" class="shop-list"></div>
             </div>
         </div>

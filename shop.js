@@ -7,16 +7,16 @@ class IdolShop {
 
         this.items = [
             // Props (Handheld)
-            { id: 'mic', name: '舞台无线麦克风', type: 'prop', price: 0, icon: '🎤', desc: '巡演现场必备手持专业麦克风' },
-            { id: 'guitar', name: '摇滚电吉他 (Guitar)', type: 'prop', price: 300, icon: '🎸', desc: '狂热朋克！帅气的樱桃红电吉他' },
-            { id: 'wand', name: '星光魔法棒 (Wand)', type: 'prop', price: 450, icon: '🪄', desc: '挥洒闪烁星尘，扩大星光吸附范围' },
-            { id: 'glowstick', name: '超绝双持应援棒', type: 'prop', price: 200, icon: '✨', desc: '打Call圣物！挥动时散发七彩虹光' },
+            { id: 'mic', name: 'STAGE WIRELESS MIC (ステージマイク)', type: 'prop', price: 0, icon: '🎤', desc: 'ライブ定番のワイヤレスマイク！クリアな歌声を会場中にお届け' },
+            { id: 'guitar', name: 'ROCK ELECTRIC GUITAR (エレキギター)', type: 'prop', price: 300, icon: '🎸', desc: 'クールなチェリーレッド！ロックなサウンドで観客を熱狂させよう' },
+            { id: 'wand', name: 'STARDUST MAGIC WAND (星の魔法の杖)', type: 'prop', price: 450, icon: '🪄', desc: 'きらめく星屑を振りまき、スターの引き寄せ範囲がUP！' },
+            { id: 'glowstick', name: 'ULTRA RAINBOW PENLIGHT (超絶ペンライト)', type: 'prop', price: 200, icon: '✨', desc: '応援の必需品！振るたびに鮮やかな虹色の光を放つ' },
 
             // Head & Wearables
-            { id: 'ribbon', name: '红白格子蝴蝶结 (经典)', type: 'head', price: 0, icon: '🎀', desc: '「なぁたん」最具标志性的招牌大发饰' },
-            { id: 'neko', name: '萌萌偶像猫耳 (Cat Ears)', type: 'head', price: 350, icon: '🐱', desc: '跳跃时耳尖会俏皮抖动的小猫耳' },
-            { id: 'crown', name: '璀璨星光王冠 (Crown)', type: 'head', price: 500, icon: '👑', desc: '银河巡演首席女王的金色微光皇冠' },
-            { id: 'wings', name: '常驻天使羽翼 (Angel Wings)', type: 'head', price: 800, icon: '🪽', desc: '神圣羽翼！直接获得常驻三段跳能力' }
+            { id: 'ribbon', name: 'RED GINGHAM RIBBON (赤チェックリボン)', type: 'head', price: 0, icon: '🎀', desc: '「なぁたん」のトレードマーク！大人気サイドポニー用の特大リボン' },
+            { id: 'neko', name: 'CUTE CAT EARS (アイドル猫耳)', type: 'head', price: 350, icon: '🐱', desc: 'ジャンプに合わせてピコピコ動くキュートな猫耳カチューシャ' },
+            { id: 'crown', name: 'SHINING STAR CROWN (星のティアラ王冠)', type: 'head', price: 500, icon: '👑', desc: '銀河ツアーを制したトップアイドルに輝くゴールドクラウン' },
+            { id: 'wings', name: 'ANGEL WINGS (常時エンジェルウィング)', type: 'head', price: 800, icon: '🪽', desc: '神聖な翼を宿し、常時トリプルジャンプ（3段ジャンプ）が可能に！' }
         ];
     }
 
@@ -54,7 +54,7 @@ class IdolShop {
             if (window.soundManager) window.soundManager.playStar(5);
             return true;
         } else {
-            alert('星光硬币不足哦！快去巡演收集更多星星吧★');
+            alert('スターコインが足りないよ！ライブツアーでスターを集めてね★ (Need more Star Coins!)');
             return false;
         }
     }
@@ -108,9 +108,9 @@ class IdolShop {
                 </div>
                 <div class="shop-item-action">
                     ${equipped 
-                        ? '<span class="status-badge equipped-badge">已装备</span>' 
+                        ? '<span class="status-badge equipped-badge">EQUIPPED (装備中)</span>' 
                         : (owned 
-                            ? `<button class="shop-btn equip-btn" onclick="window.idolShop.equip('${item.id}')">装备</button>`
+                            ? `<button class="shop-btn equip-btn" onclick="window.idolShop.equip('${item.id}')">EQUIP (装備)</button>`
                             : `<button class="shop-btn buy-btn" onclick="window.idolShop.buy('${item.id}')">⭐ ${item.price}</button>`
                         )
                     }

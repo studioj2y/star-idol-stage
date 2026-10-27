@@ -66,7 +66,7 @@ const TOUR_STAGES = [
     },
     {
         id: 'galaxy',
-        name: '銀河終点大舞台 · GALAXY DOME',
+        name: '銀河大舞台 · GALAXY DOME STAGE',
         subname: 'THE GRAND COSMIC FINALE',
         icon: '🌌',
         goalAltitude: 1200,
